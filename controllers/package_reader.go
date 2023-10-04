@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log/slog"
 
 	model "github.com/pkg-app-viewer/models"
@@ -14,7 +15,7 @@ type Packages struct {
 	Installed *model.Installed
 }
 
-func InitPackages(m *model.Menu, logger *slog.Logger) *Packages {
+func NewPackages(m *model.Menu, logger *slog.Logger) *Packages {
 	p := new(Packages)
 	p.MenuModel = m
 	p.logging = logger
@@ -22,6 +23,48 @@ func InitPackages(m *model.Menu, logger *slog.Logger) *Packages {
 	p.Find = Finder(p.Tool)
 	p.Installed = model.NewInstalled(logger)
 	return p
+}
+
+func (p *Packages) RunController() {
+	switch p.MenuModel.PackageType {
+	case model.AptAll:
+		{
+			p.AptAll()
+			for _, r := range p.Installed.AptAll {
+				fmt.Println(r)
+			}
+		}
+	case model.AptAdded:
+		{
+			p.AptAdded()
+			for _, r := range p.Installed.AptAdded {
+				fmt.Println(r)
+			}
+		}
+	case model.AptManual:
+		{
+			p.AptManual()
+			for _, r := range p.Installed.AptManual {
+				fmt.Println(r)
+			}
+		}
+	case model.AptAdvanced:
+		{
+			switch p.MenuModel.Mode {
+			case "File":
+				{
+					p.AptFromFile()
+				}
+			case "Directory":
+				{
+					p.AptFromDir()
+				}
+			}
+			for _, r := range p.Installed.AptAdvanced {
+				fmt.Println(r)
+			}
+		}
+	}
 }
 
 func (p *Packages) AptAll() {
