@@ -9,6 +9,10 @@ type Package int8
 const (
 	None Package = iota
 	Apt
+	RPM
+	Pacman
+	Zypper
+	Nix
 	Flatpak
 	Snap
 	Go

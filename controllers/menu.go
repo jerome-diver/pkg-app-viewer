@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log/slog"
 
 	model "github.com/pkg-app-viewer/models"
@@ -21,13 +22,17 @@ func NewMenu(logger *slog.Logger) *Menu {
 	menu.View = view.NewMenu()
 	menu.Model = model.NewMenu()
 	menu.View.Apt.Run = menu.execApt
-	menu.View.Rust.Run = menu.execRustType
-	menu.View.Go.Run = menu.execGoType
-	menu.View.Flatpak.Run = menu.execFlatpakType
-	menu.View.Snap.Run = menu.execSnapType
-	menu.View.Rubygem.Run = menu.execRubygemType
-	menu.View.Pip.Run = menu.execPipType
-	menu.View.Source.Run = menu.execSourceType
+	menu.View.RPM.Run = menu.execRPM
+	menu.View.Pacman.Run = menu.execPacman
+	menu.View.Zypper.Run = menu.execZypper
+	menu.View.Nix.Run = menu.execNix
+	menu.View.Rust.Run = menu.execRust
+	menu.View.Go.Run = menu.execGo
+	menu.View.Flatpak.Run = menu.execFlatpak
+	menu.View.Snap.Run = menu.execSnap
+	menu.View.Rubygem.Run = menu.execRubygem
+	menu.View.Pip.Run = menu.execPip
+	menu.View.Source.Run = menu.execSource
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.Interactive, "interactive", "i", false, "Interactive terminal mode")
@@ -36,11 +41,26 @@ func NewMenu(logger *slog.Logger) *Menu {
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Format, "format", "f", "txt", "Output format type")
 	menu.View.Apt.Flags().StringVarP(&menu.Model.DirName, "fromDir", "D", "", "indicate directory to search for apt history log files")
 	menu.View.Apt.Flags().StringVarP(&menu.Model.FileName, "fromFile", "F", "", "indicate files to search for apt history log files")
-	menu.View.Root.AddCommand(menu.View.Apt, menu.View.Flatpak, menu.View.Snap,
+	menu.View.Root.AddCommand(menu.View.Apt, menu.View.RPM, menu.View.Pacman,
+		menu.View.Zypper, menu.View.Nix,
+		menu.View.Flatpak, menu.View.Snap,
 		menu.View.Rust, menu.View.Rubygem, menu.View.Pip,
 		menu.View.Go, menu.View.Source)
+	menu.View.Root.PersistentPreRunE = menu.validateGeneralFlags
 	menu.View.Root.Execute()
 	return menu
+}
+
+func (m *Menu) validateGeneralFlags(cmd *cobra.Command, arg []string) error {
+	// check to validate OutputMode flag
+	switch m.Model.OutputMode {
+	case "stdout":
+		return nil
+	case "file":
+		return nil
+	default:
+		return fmt.Errorf("OutputMode unvalid flag %s\n", m.Model.OutputMode)
+	}
 }
 
 func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
@@ -62,37 +82,57 @@ func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
 	}
 }
 
-func (m *Menu) execFlatpakType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execFlatpak(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Flatpak
 }
 
-func (m *Menu) execSnapType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execRPM(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.RPM
+}
+
+func (m *Menu) execPacman(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Snap
 }
 
-func (m *Menu) execRubygemType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execZypper(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Snap
+}
+
+func (m *Menu) execNix(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Snap
+}
+
+func (m *Menu) execSnap(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Snap
+}
+
+func (m *Menu) execRubygem(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Rubygem
 }
 
-func (m *Menu) execPipType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execPip(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Pip
 }
 
-func (m *Menu) execRustType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execRust(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Rust
 }
 
-func (m *Menu) execGoType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execGo(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Go
 }
 
-func (m *Menu) execSourceType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execSource(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Source
 }
