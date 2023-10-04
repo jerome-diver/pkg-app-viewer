@@ -27,96 +27,49 @@ func NewPackages(m *model.Menu, logger *slog.Logger) *Packages {
 
 func (p *Packages) RunController() {
 	switch p.MenuModel.PackageType {
-	case model.AptAll:
+	case model.Apt:
 		{
-			p.AptAll()
-			for _, r := range p.Installed.AptAll {
-				fmt.Println(r)
-			}
-		}
-	case model.AptAdded:
-		{
-			p.AptAdded()
-			for _, r := range p.Installed.AptAdded {
-				fmt.Println(r)
-			}
-		}
-	case model.AptManual:
-		{
-			p.AptManual()
-			for _, r := range p.Installed.AptManual {
-				fmt.Println(r)
-			}
-		}
-	case model.AptAdvanced:
-		{
-			switch p.MenuModel.Mode {
-			case "File":
-				{
-					p.AptFromFile()
-				}
-			case "Directory":
-				{
-					p.AptFromDir()
+			found := p.Apt(p.MenuModel.PackageSearch)
+			for _, r := range found {
+				switch p.MenuModel.OutputMode {
+				case "stdout":
+					fmt.Println(r)
+				default:
+					fmt.Println(r)
 				}
 			}
-			for _, r := range p.Installed.AptAdvanced {
-				fmt.Println(r)
-			}
 		}
 	}
 }
 
-func (p *Packages) AptAll() {
-	p.logging.Debug("RUN Packages.AptAll from controller (package_reader.go)")
-	p.MenuModel.DirName = "/var/log/apt"
-	filesList := p.Tool.GetAptHistoryFilesList(p.MenuModel)
-	for _, file := range filesList {
-		p.MenuModel.FileName = file
+func (p *Packages) Apt(searchFor model.Search) []string {
+	p.logging.Debug("RUN Packages.Apt from controller (package_reader.go)",
+		slog.String("searchFor", searchFor.String()))
+	if p.MenuModel.FileName != "" {
 		clearBytes := p.Tool.GetFileContent(p.MenuModel)
-		p.Find.AptInstalledFromHistory(clearBytes, "all")
+		p.Find.AptInstalledFromHistory(clearBytes, searchFor)
+	} else {
+		if p.MenuModel.DirName == "" {
+			p.MenuModel.DirName = "/var/log/apt"
+		}
+		filesList := p.Tool.GetAptHistoryFilesList(p.MenuModel)
+		for _, file := range filesList {
+			p.MenuModel.FileName = file
+			clearBytes := p.Tool.GetFileContent(p.MenuModel)
+			p.Find.AptInstalledFromHistory(clearBytes, searchFor)
+		}
 	}
-	p.Installed.AptAll = p.Find.Packages
-}
-
-func (p *Packages) AptFromFile() {
-	p.logging.Debug("RUN Packages.AptFromFile from controller (package_reader.go)")
-	clearBytes := p.Tool.GetFileContent(p.MenuModel)
-	p.Find.AptInstalledFromHistory(clearBytes, "all")
-	p.Installed.AptAdvanced = p.Find.Packages
-}
-
-func (p *Packages) AptFromDir() {
-	p.logging.Debug("RUN Packages.AptFromDir from controller (package_reader.go)")
-	filesList := p.Tool.GetAptHistoryFilesList(p.MenuModel)
-	for _, file := range filesList {
-		p.MenuModel.FileName = file
-		clearBytes := p.Tool.GetFileContent(p.MenuModel)
-		p.Find.AptInstalledFromHistory(clearBytes, "all")
+	switch searchFor {
+	case model.All:
+		p.Installed.Apt.All = p.Find.Packages
+	case model.Added:
+		p.Installed.Apt.Added = p.Find.Packages
+	case model.OtherRepos:
+		p.Installed.Apt.Other = p.Find.Packages
+	case model.OfficialRepos:
+		p.Installed.Apt.Official = p.Find.Packages
+	case model.FileSource:
+		p.Installed.Apt.FileSource = p.Find.Packages
 	}
-	p.Installed.AptAdvanced = p.Find.Packages
-}
-
-func (p *Packages) AptAdded() {
-	p.logging.Debug("RUN Packages.AptAdded from controller (package_reader.go)")
-	p.MenuModel.DirName = "/var/log/apt"
-	filesList := p.Tool.GetAptHistoryFilesList(p.MenuModel)
-	for _, file := range filesList {
-		p.MenuModel.FileName = file
-		clearBytes := p.Tool.GetFileContent(p.MenuModel)
-		p.Find.AptInstalledFromHistory(clearBytes, "added")
-	}
-	p.Installed.AptAdded = p.Find.Packages
-}
-
-func (p *Packages) AptManual() {
-	p.logging.Debug("RUN Packages.AptManual from controller (package_reader.go)")
-	p.MenuModel.DirName = "/var/log/apt"
-	filesList := p.Tool.GetAptHistoryFilesList(p.MenuModel)
-	for _, file := range filesList {
-		p.MenuModel.FileName = file
-		clearBytes := p.Tool.GetFileContent(p.MenuModel)
-		p.Find.AptInstalledFromHistory(clearBytes, "manual")
-	}
-	p.Installed.AptManual = p.Find.Packages
+	return p.Find.Packages
 }

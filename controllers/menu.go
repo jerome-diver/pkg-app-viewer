@@ -20,55 +20,42 @@ func NewMenu(logger *slog.Logger) *Menu {
 	menu.logger = logger
 	menu.View = view.NewMenu()
 	menu.Model = model.NewMenu()
-	menu.View.Apt.Run = menu.execAptType
-	menu.View.FromFile.Run = menu.execAptFile
-	menu.View.FromDir.Run = menu.execAptDir
+	menu.View.Apt.Run = menu.execApt
 	menu.View.Rust.Run = menu.execRustType
 	menu.View.Go.Run = menu.execGoType
 	menu.View.Flatpak.Run = menu.execFlatpakType
 	menu.View.Snap.Run = menu.execSnapType
 	menu.View.Source.Run = menu.execSourceType
-	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "m", false, "show meta of gz files")
+	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.Interactive, "interactive", "i", false, "Interactive terminal mode")
-	menu.View.FromDir.Flags().StringVarP(&menu.Model.DirName, "aptDir", "D", "/var/log/apt", "indicate directory to search for apt history log files")
-	menu.View.FromFile.Flags().StringVarP(&menu.Model.FileName, "aptFile", "F", "/var/log/apt/history.log", "indicate files to search for apt history log files")
+	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.OutputFile, "outFile", "o", "pkg_list.txt", "Output file name")
+	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.OutputMode, "outMode", "m", "stdout", "Output mode")
+	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Format, "format", "f", "txt", "Output format type")
+	menu.View.Apt.Flags().StringVarP(&menu.Model.DirName, "fromDir", "D", "", "indicate directory to search for apt history log files")
+	menu.View.Apt.Flags().StringVarP(&menu.Model.FileName, "fromFile", "F", "", "indicate files to search for apt history log files")
 	menu.View.Root.AddCommand(menu.View.Apt, menu.View.Flatpak, menu.View.Snap,
 		menu.View.Rust, menu.View.Go, menu.View.Source)
-	menu.View.Apt.AddCommand(menu.View.FromFile, menu.View.FromDir)
 	menu.View.Root.Execute()
 	return menu
 }
 
-func (m *Menu) execAptFile(cmd *cobra.Command, arg []string) {
-	m.logger.Debug("Read file argument from menu execAptFile cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.AptAdvanced
-	m.Model.Mode = "File"
-	m.Model.FileName = arg[0]
-}
-
-func (m *Menu) execAptDir(cmd *cobra.Command, arg []string) {
-	m.logger.Debug("Read dir argument from menu execAptDir cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.AptAdvanced
-	m.Model.Mode = "Directory"
-	m.Model.DirName = arg[0]
-}
-
-func (m *Menu) execAptType(cmd *cobra.Command, arg []string) {
+func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
 	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Apt
 	switch arg[0] {
 	case "All":
-		m.Model.PackageType = model.AptAll
+		m.Model.PackageSearch = model.All
 	case "Added":
-		m.Model.PackageType = model.AptAdded
+		m.Model.PackageSearch = model.Added
 	case "OfficialAdded":
-		m.Model.PackageType = model.AptOfficialAdded
+		m.Model.PackageSearch = model.OfficialRepos
 	case "OtherRepos":
-		m.Model.PackageType = model.AptOtherRepos
-	case "Manual":
-		m.Model.PackageType = model.AptManual
+		m.Model.PackageSearch = model.OtherRepos
+	case "FileSource":
+		m.Model.PackageSearch = model.FileSource
 	default:
-		m.Model.PackageType = model.AptAll
+		m.Model.PackageSearch = model.All
 	}
 }
 

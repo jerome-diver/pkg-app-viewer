@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"regexp"
 	"slices"
+
+	model "github.com/pkg-app-viewer/models"
 )
 
 type Find struct {
@@ -96,14 +98,14 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 
 *
 */
-func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode string) {
+func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
 	var cmp func(string) bool
 	switch mode {
-	case "all":
+	case model.All:
 		cmp = func(p string) bool { return true }
-	case "added":
+	case model.Added:
 		cmp = func(p string) bool { return true }
-	case "manual":
+	case model.FileSource:
 		cmp = func(p string) bool {
 			re := regexp.MustCompile(`.*\.deb$`)
 			ok := re.MatchString(p)
@@ -119,7 +121,7 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode string) {
 	var ipl []byte
 	for scanner.Scan() {
 		b := scanner.Bytes()
-		if mode == "added" {
+		if mode == model.Added {
 			if _, _, found := bytes.Cut(b, []byte("Requested-by: ")); found {
 				f.installOccurenceFound(ipl, cmp)
 			}
@@ -128,7 +130,7 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode string) {
 		if _, ipl, found := bytes.Cut(b, []byte("apt-get install ")); found {
 			f.tool.logger.Debug("find apt-get install occurence",
 				slog.String("CutAfter", string(ipl)))
-			if mode == "all" || mode == "manual" {
+			if mode == model.All || mode == model.FileSource {
 				f.installOccurenceFound(ipl, cmp)
 			}
 			continue // next scan if treated there as "apt install" line detected
