@@ -3,21 +3,24 @@ package view
 import "github.com/spf13/cobra"
 
 type Menu struct {
-	Root       *cobra.Command
-	Apt        *cobra.Command
-	FromFile   *cobra.Command
-	FromDir    *cobra.Command
-	Flatpak    *cobra.Command
-	Snap       *cobra.Command
-	Source     *cobra.Command
-	Rust       *cobra.Command
-	Go         *cobra.Command
-	OutputMode *cobra.Command
+	Root    *cobra.Command
+	Apt     *cobra.Command
+	Flatpak *cobra.Command
+	Snap    *cobra.Command
+	Rust    *cobra.Command
+	Rubygem *cobra.Command
+	Go      *cobra.Command
+	Pip     *cobra.Command
+	Source  *cobra.Command
 }
 
 func NewMenu() *Menu {
 	vm := new(Menu)
-	vm.Root = &cobra.Command{Use: "pkg-apt-viewer"}
+	vm.Root = &cobra.Command{
+		Use:   "pkg-apt-viewer",
+		Short: "Helper in Go to find installed aplicatins packages",
+		Long:  "You can find for many packages manager installed application from (see command list to clal them)",
+	}
 	vm.Apt = &cobra.Command{
 		Use:       "Apt [All, Added, OfficialAdded, FileSource, OtherRepos]",
 		Short:     "Select Apt package type",
@@ -49,10 +52,22 @@ func NewMenu() *Menu {
 		Long:  "Select Rust package manager type and content to get list from",
 		Args:  cobra.NoArgs,
 	}
+	vm.Rubygem = &cobra.Command{
+		Use:   "Rubygem",
+		Short: "Select Rubygem manager package type",
+		Long:  "Select Rubygem package manager type and content to get list from",
+		Args:  cobra.NoArgs,
+	}
 	vm.Go = &cobra.Command{
 		Use:   "Go",
 		Short: "Select Go package type",
 		Long:  "Select Go package manager type and content to get list from",
+		Args:  cobra.NoArgs,
+	}
+	vm.Pip = &cobra.Command{
+		Use:   "Pip",
+		Short: "Select Pip manager package type",
+		Long:  "Select Python pip package manager type and content to get list from",
 		Args:  cobra.NoArgs,
 	}
 	return vm

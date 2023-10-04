@@ -7,7 +7,8 @@ import (
 type Package int8
 
 const (
-	Apt Package = iota
+	None Package = iota
+	Apt
 	Flatpak
 	Snap
 	Go

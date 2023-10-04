@@ -25,6 +25,8 @@ func NewMenu(logger *slog.Logger) *Menu {
 	menu.View.Go.Run = menu.execGoType
 	menu.View.Flatpak.Run = menu.execFlatpakType
 	menu.View.Snap.Run = menu.execSnapType
+	menu.View.Rubygem.Run = menu.execRubygemType
+	menu.View.Pip.Run = menu.execPipType
 	menu.View.Source.Run = menu.execSourceType
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
@@ -35,7 +37,8 @@ func NewMenu(logger *slog.Logger) *Menu {
 	menu.View.Apt.Flags().StringVarP(&menu.Model.DirName, "fromDir", "D", "", "indicate directory to search for apt history log files")
 	menu.View.Apt.Flags().StringVarP(&menu.Model.FileName, "fromFile", "F", "", "indicate files to search for apt history log files")
 	menu.View.Root.AddCommand(menu.View.Apt, menu.View.Flatpak, menu.View.Snap,
-		menu.View.Rust, menu.View.Go, menu.View.Source)
+		menu.View.Rust, menu.View.Rubygem, menu.View.Pip,
+		menu.View.Go, menu.View.Source)
 	menu.View.Root.Execute()
 	return menu
 }
@@ -59,22 +62,37 @@ func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
 	}
 }
 
+func (m *Menu) execFlatpakType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Flatpak
+}
+
+func (m *Menu) execSnapType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Snap
+}
+
+func (m *Menu) execRubygemType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Rubygem
+}
+
+func (m *Menu) execPipType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Pip
+}
+
 func (m *Menu) execRustType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Rust
 }
 
 func (m *Menu) execGoType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Go
 }
 
 func (m *Menu) execSourceType(cmd *cobra.Command, arg []string) {
+	m.logger.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Source
-}
-
-func (m *Menu) execSnapType(cmd *cobra.Command, arg []string) {
-	m.Model.PackageType = model.Snap
-}
-
-func (m *Menu) execFlatpakType(cmd *cobra.Command, arg []string) {
-	m.Model.PackageType = model.Flatpak
 }
