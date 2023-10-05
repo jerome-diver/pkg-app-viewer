@@ -1,14 +1,15 @@
 package controller
 
 import (
-	"fmt"
 	"log/slog"
 
 	model "github.com/pkg-app-viewer/models"
+	view "github.com/pkg-app-viewer/views"
 )
 
 type Packages struct {
 	MenuModel *model.Menu
+	Printer   *view.Printer
 	Tool      *Tool
 	Find      *Find
 	logging   *slog.Logger
@@ -22,6 +23,7 @@ func NewPackages(m *model.Menu, logger *slog.Logger) *Packages {
 	p.Tool = ToolBox(p.logging)
 	p.Find = Finder(p.Tool)
 	p.Installed = model.NewInstalled(logger)
+	p.Printer = view.NewPrinter(logger, m)
 	return p
 }
 
@@ -30,14 +32,7 @@ func (p *Packages) RunController() {
 	case model.Apt:
 		{
 			found := p.Apt(p.MenuModel.PackageSearch)
-			for _, r := range found {
-				switch p.MenuModel.OutputMode {
-				case "stdout":
-					fmt.Println(r)
-				default:
-					fmt.Println(r)
-				}
-			}
+			p.Printer.Write(found)
 		}
 	}
 }

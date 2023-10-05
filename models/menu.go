@@ -1,5 +1,11 @@
 package model
 
+type Output struct {
+	File   string
+	Mode   string
+	Format string
+}
+
 type Menu struct {
 	PackageType   Package
 	PackageSearch Search
@@ -8,9 +14,7 @@ type Menu struct {
 	Mode          string
 	ShowMeta      bool
 	Debug         string
-	OutputFile    string
-	OutputMode    string
-	Format        string
+	Output        Output
 	Interactive   bool
 }
 

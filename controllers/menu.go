@@ -36,9 +36,9 @@ func NewMenu(logger *slog.Logger) *Menu {
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.Interactive, "interactive", "i", false, "Interactive terminal mode")
-	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.OutputFile, "outFile", "o", "pkg_list.txt", "Output file name")
-	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.OutputMode, "outMode", "m", "stdout", "Output mode")
-	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Format, "format", "f", "txt", "Output format type")
+	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Output.File, "outFile", "o", "", "Output file name")
+	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Output.Mode, "outMode", "m", "stdout", "Output mode")
+	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Output.Format, "format", "f", "txt", "Output format type")
 	menu.View.Apt.Flags().StringVarP(&menu.Model.DirName, "fromDir", "D", "", "indicate directory to search for apt history log files")
 	menu.View.Apt.Flags().StringVarP(&menu.Model.FileName, "fromFile", "F", "", "indicate files to search for apt history log files")
 	menu.View.Root.AddCommand(menu.View.Apt, menu.View.RPM, menu.View.Pacman,
@@ -53,14 +53,26 @@ func NewMenu(logger *slog.Logger) *Menu {
 
 func (m *Menu) validateGeneralFlags(cmd *cobra.Command, arg []string) error {
 	// check to validate OutputMode flag
-	switch m.Model.OutputMode {
+	switch m.Model.Output.Mode {
 	case "stdout":
-		return nil
+		break
 	case "file":
-		return nil
+		break
 	default:
-		return fmt.Errorf("OutputMode unvalid flag %s\n", m.Model.OutputMode)
+		return fmt.Errorf("OutputMode unvalid flag %s", m.Model.Output.Mode)
 	}
+	switch m.Model.Output.Format {
+	case "txt":
+		break
+	case "json":
+		break
+	case "yaml":
+		break
+	case "csv":
+	default:
+		return fmt.Errorf("Output.Format unvalid flag %s", m.Model.Output.Format)
+	}
+	return nil
 }
 
 func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
