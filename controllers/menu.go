@@ -16,7 +16,7 @@ type Menu struct {
 	logger *slog.Logger
 }
 
-func NewMenu(logger *slog.Logger) *Menu {
+func NewMenu(logger *slog.Logger, version string) *Menu {
 	menu := new(Menu)
 	menu.logger = logger
 	menu.View = view.NewMenu()
@@ -47,6 +47,7 @@ func NewMenu(logger *slog.Logger) *Menu {
 		menu.View.Rust, menu.View.Rubygem, menu.View.Pip,
 		menu.View.Go, menu.View.Source)
 	menu.View.Root.PersistentPreRunE = menu.validateGeneralFlags
+	menu.View.Root.Version = version
 	menu.View.Root.Execute()
 	return menu
 }
