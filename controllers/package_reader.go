@@ -5,25 +5,30 @@ import (
 
 	model "github.com/pkg-app-viewer/models"
 	view "github.com/pkg-app-viewer/views"
+	"github.com/spf13/viper"
 )
 
 type Packages struct {
-	MenuModel *model.Menu
-	Printer   *view.Printer
-	Tool      *Tool
-	Find      *Find
-	logging   *slog.Logger
-	Installed *model.Installed
+	MenuModel  *model.Menu
+	Printer    *view.Printer
+	Tool       *Tool
+	Find       *Find
+	Config     *viper.Viper
+	ConfigFile *model.ConfigFile
+	logging    *view.Logging
+	Installed  *model.Installed
 }
 
-func NewPackages(m *model.Menu, logger *slog.Logger) *Packages {
+func NewPackages(m *Menu, logger *view.Logging, config *viper.Viper) *Packages {
 	p := new(Packages)
-	p.MenuModel = m
+	p.MenuModel = m.Model
 	p.logging = logger
+	p.Config = config
+	p.ConfigFile = m.Config
 	p.Tool = ToolBox(p.logging)
-	p.Find = Finder(p.Tool)
-	p.Installed = model.NewInstalled(logger)
-	p.Printer = view.NewPrinter(logger, m)
+	p.Find = Finder(logger)
+	p.Installed = new(model.Installed)
+	p.Printer = view.NewPrinter(logger, m.Model)
 	return p
 }
 
@@ -35,10 +40,21 @@ func (p *Packages) RunController() {
 			p.Printer.Write(found)
 		}
 	}
+	switch p.MenuModel.Command {
+	case model.SearchSystem_pm:
+		{
+			p.SearchSystem_pm()
+		}
+	}
+}
+
+func (p *Packages) SearchSystem_pm() {
+	spm := NewSearchManager(p.logging, p.ConfigFile)
+	spm.SearchSystemPM()
 }
 
 func (p *Packages) Apt(searchFor model.Search) []string {
-	p.logging.Debug("RUN Packages.Apt from controller (package_reader.go)",
+	p.logging.Log.Debug("RUN Packages.Apt from controller (package_reader.go)",
 		slog.String("searchFor", searchFor.String()))
 	if p.MenuModel.FileName != "" {
 		clearBytes := p.Tool.GetFileContent(p.MenuModel)

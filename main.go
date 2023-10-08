@@ -10,7 +10,7 @@ import (
 
 const version = "0.0.1"
 
-var logger *slog.Logger
+var logger *view.Logging
 var menu *controller.Menu
 var packages *controller.Packages
 
@@ -23,15 +23,15 @@ func init() {
 	config.AddConfigPath("/home/dge/.config/pkg-app-viewer")
 	err := config.ReadInConfig()
 	if err != nil {
-		logger.Error("can not unmarshall config file", slog.String("err", err.Error()))
+		logger.Log.Error("can not unmarshall config file", slog.String("err", err.Error()))
 	}
 	menu = controller.NewMenu(logger, version, config)
-	packages = controller.NewPackages(menu.Model, logger)
+	packages = controller.NewPackages(menu, logger, config)
 }
 
 func main() {
 
-	view.DebugLevel(menu.Model.Debug)
+	logger.DebugLevel(menu.Model.Debug)
 	packages.RunController()
 
 }

@@ -10,21 +10,15 @@ import (
 	model "github.com/pkg-app-viewer/models"
 )
 
-func check(err error, logger *slog.Logger) {
-	if err != nil {
-		logger.Error("Printer failed with", slog.String("Error", err.Error()))
-	}
-}
-
 type Printer struct {
-	logger    *slog.Logger
+	logger    *Logging
 	Output    model.Output
 	Packager  model.Package
 	SearchFor model.Search
 	Data      []string
 }
 
-func NewPrinter(logger *slog.Logger, model *model.Menu) *Printer {
+func NewPrinter(logger *Logging, model *model.Menu) *Printer {
 	p := &Printer{
 		logger:    logger,
 		Output:    model.Output,
@@ -59,13 +53,14 @@ func (p *Printer) Write(data []string) {
 					Items: []string{"Overwrite", "Append", "Cancel"},
 				}
 				_, result, err := prompt.Run()
-				check(err, p.logger)
+				p.logger.Error = err
+				p.logger.CheckError("Prompt return bad statement")
 				var options int
 				switch result {
 				case "Overwrite":
 					{
-						err = os.Truncate(p.Output.File, 0)
-						check(err, p.logger)
+						p.logger.Error = os.Truncate(p.Output.File, 0)
+						p.logger.CheckError("Truncate Output.File gone bad")
 						options = os.O_RDWR | os.O_CREATE
 					}
 				case "Append":
@@ -74,15 +69,17 @@ func (p *Printer) Write(data []string) {
 					os.Exit(0)
 				}
 				f, err := os.OpenFile(p.Output.File, options, 0644)
-				check(err, p.logger)
+				p.logger.Error = err
+				p.logger.CheckError("Can not open Output.File")
 				p.writeInFile(f)
 			} else if os.IsNotExist(err) {
 				f, err := os.Create(p.Output.File)
-				check(err, p.logger)
+				p.logger.Error = err
+				p.logger.CheckError("OutFile doesn't existe and i can not create Output.File")
 				p.writeInFile(f)
-				check(err, p.logger)
 			} else {
-				check(err, p.logger)
+				p.logger.Error = err
+				p.logger.CheckError("Output.File error")
 			}
 		}
 	}
@@ -92,11 +89,12 @@ func (p *Printer) writeInFile(f *os.File) {
 	var s_byte int
 	for _, str := range p.Data {
 		n, err := f.WriteString(str + "\n")
-		check(err, p.logger)
+		p.logger.Error = err
+		p.logger.CheckError("Can  t write in file")
 		s_byte += n
 	}
 	defer f.Close()
-	p.logger.Debug("writed in file",
+	p.logger.Log.Debug("writed in file",
 		slog.String("file", p.Output.File),
 		slog.Int("size(byte)", s_byte))
 }

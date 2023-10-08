@@ -6,19 +6,20 @@ import (
 )
 
 type Menu struct {
-	Root    *cobra.Command
-	Apt     *cobra.Command
-	RPM     *cobra.Command
-	Pacman  *cobra.Command
-	Zypper  *cobra.Command
-	Nix     *cobra.Command
-	Flatpak *cobra.Command
-	Snap    *cobra.Command
-	Rust    *cobra.Command
-	Rubygem *cobra.Command
-	Go      *cobra.Command
-	Pip     *cobra.Command
-	Source  *cobra.Command
+	Root          *cobra.Command
+	SearchManager *cobra.Command
+	Apt           *cobra.Command
+	RPM           *cobra.Command
+	Pacman        *cobra.Command
+	Zypper        *cobra.Command
+	Nix           *cobra.Command
+	Flatpak       *cobra.Command
+	Snap          *cobra.Command
+	Rust          *cobra.Command
+	Rubygem       *cobra.Command
+	Go            *cobra.Command
+	Pip           *cobra.Command
+	Source        *cobra.Command
 }
 
 func NewMenu(config *model.ConfigFile) *Menu {
@@ -28,6 +29,12 @@ func NewMenu(config *model.ConfigFile) *Menu {
 		Use:   "pkg-apt-viewer",
 		Short: "Helper in Go to find installed aplicatins packages",
 		Long:  "You can find for many packages manager installed application from (see command list to call them)",
+	}
+	vm.SearchManager = &cobra.Command{
+		Use:   "SearchManager",
+		Short: "Search package managers",
+		Long:  "Search in the system any package managers to update config file and menu",
+		Args:  cobra.NoArgs,
 	}
 	switch config.System.Distribution_ID {
 	case "ubuntu":

@@ -8,16 +8,17 @@ import (
 	"slices"
 
 	model "github.com/pkg-app-viewer/models"
+	view "github.com/pkg-app-viewer/views"
 )
 
 type Find struct {
-	tool     *Tool
+	logger   *view.Logging
 	Packages []string
 }
 
-func Finder(tool *Tool) *Find {
+func Finder(logger *view.Logging) *Find {
 	f := new(Find)
-	f.tool = tool
+	f.logger = logger
 	return f
 }
 
@@ -25,7 +26,7 @@ func (f *Find) cleanBytes(ipl []byte) []byte {
 	// find "-y ", "-o <word>=\d", "-<-word>+"
 	re_parser := regexp.MustCompile(`.*(\-y\s)|(\-o\s.*\=\d\s)*(\-(\-\w*)+\s)*(.*)`)
 	clean := re_parser.ReplaceAllString(string(ipl), "$5")
-	f.tool.logger.Debug("cleaned ipl", slog.String("ipl", clean))
+	f.logger.Log.Debug("cleaned ipl", slog.String("ipl", clean))
 	return []byte(clean)
 }
 
@@ -39,7 +40,7 @@ func (f *Find) installOccurenceFound(ipl []byte, comp func(string) bool) {
 		clean_w := bytes.Trim(w, " ")
 		sclean_w := string(clean_w)
 		if slices.Contains(f.Packages, sclean_w) {
-			f.tool.logger.Warn("already listed in packages []string", slog.String("name", sclean_w))
+			f.logger.Log.Warn("already listed in packages []string", slog.String("name", sclean_w))
 			continue
 		}
 		if len(clean_w) == 0 {
@@ -48,7 +49,7 @@ func (f *Find) installOccurenceFound(ipl []byte, comp func(string) bool) {
 		if comp(sclean_w) {
 			f.Packages = append(f.Packages, sclean_w)
 		}
-		f.tool.logger.Info("added to packages []string", slog.String("name", sclean_w))
+		f.logger.Log.Info("added to packages []string", slog.String("name", sclean_w))
 	}
 }
 
@@ -65,7 +66,7 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 		}
 		find_index := slices.Index(f.Packages, string(clean_w))
 		if find_index != -1 {
-			f.tool.logger.Warn("found occurence to delete in packages []string", slog.String("name", string(clean_w)))
+			f.logger.Log.Warn("found occurence to delete in packages []string", slog.String("name", string(clean_w)))
 			last := find_index + 1
 			f.Packages = slices.Delete(f.Packages, find_index, last)
 		}
@@ -112,7 +113,7 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
 			return ok
 		}
 	}
-	f.tool.logger.Info("Start function AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
+	f.logger.Log.Info("Start function AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
 	scanner := bufio.NewScanner(bytes.NewReader(rawHistory))
 	const maxCapacity = 512 * 1024
 	buf := make([]byte, maxCapacity)
@@ -128,7 +129,7 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
 		}
 		// detect, cut and separate apt install list packages
 		if _, ipl, found := bytes.Cut(b, []byte("apt-get install ")); found {
-			f.tool.logger.Debug("find apt-get install occurence",
+			f.logger.Log.Debug("find apt-get install occurence",
 				slog.String("CutAfter", string(ipl)))
 			if mode == model.All || mode == model.FileSource {
 				f.installOccurenceFound(ipl, cmp)
@@ -136,21 +137,20 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
 			continue // next scan if treated there as "apt install" line detected
 		}
 		if _, ipl, found := bytes.Cut(b, []byte("apt install ")); found {
-			f.tool.logger.Debug("find apt install occurence",
+			f.logger.Log.Debug("find apt install occurence",
 				slog.String("CutAfter", string(ipl)))
 			f.installOccurenceFound(ipl, cmp)
 			continue // next scan if treated there as "apt install" line detected
 		}
 		// detect, cut and separate apt remove list packages
 		if _, removed_potential_list, found := bytes.Cut(b, []byte("apt remove ")); found {
-			f.tool.logger.Warn("find apt remove occurence",
+			f.logger.Log.Warn("find apt remove occurence",
 				slog.String("CutAfter", string(removed_potential_list)))
 			f.removedOccurenceFound(removed_potential_list)
 			continue // next scan if treated there as "apt remove" line detected
 		}
 
 	}
-	if scanner.Err() != nil {
-		f.tool.logger.Error("SCANNER ERROR", slog.String("msg", scanner.Err().Error()))
-	}
+	f.logger.Error = scanner.Err()
+	f.logger.CheckError("Scanner error at history time")
 }

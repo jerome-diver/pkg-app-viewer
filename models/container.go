@@ -1,8 +1,25 @@
 package model
 
-import (
-	"log/slog"
+type CommandRun int8
+
+const (
+	nada CommandRun = iota
+	SearchSystem_pm
+	SearchIsolated_pm
+	SearchLanguage_pm
 )
+
+func (c CommandRun) String() string {
+	switch c {
+	case SearchIsolated_pm:
+		return "SearchIsolatedPM"
+	case SearchSystem_pm:
+		return "SearchSystemPM"
+	case SearchLanguage_pm:
+		return "SearchLanguagePM"
+	}
+	return "unknown"
+}
 
 type Package int8
 
@@ -12,6 +29,7 @@ const (
 	RPM
 	Pacman
 	Zypper
+	Emerge
 	Nix
 	Flatpak
 	Snap
@@ -87,12 +105,4 @@ type Installed struct {
 	Pip     []string
 	Go      []string
 	Source  []string
-}
-
-var logger *slog.Logger
-
-func NewInstalled(log *slog.Logger) *Installed {
-	logger = log
-	logger.Debug("Created a new Installed struct of installed packages list")
-	return new(Installed)
 }

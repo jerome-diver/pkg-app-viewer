@@ -7,6 +7,7 @@ type Output struct {
 }
 
 type Menu struct {
+	Command       CommandRun
 	PackageType   Package
 	PackageSearch Search
 	FileName      string

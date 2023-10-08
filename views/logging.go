@@ -11,12 +11,23 @@ import (
 	"github.com/fatih/color"
 )
 
-var loggingLevel *slog.LevelVar
-var logging *slog.Logger
-
 type PrettyHandler struct {
 	slog.Handler
 	l *log.Logger
+}
+
+type Logging struct { // proxy to add methd checkError
+	Error   error
+	Log     *slog.Logger
+	Handler *PrettyHandler
+	Level   *slog.LevelVar
+	Opt     *slog.HandlerOptions
+}
+
+func (l *Logging) CheckError(msg string) {
+	if l.Error != nil {
+		l.Log.Error(msg, slog.String("err", l.Error.Error()))
+	}
 }
 
 func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
@@ -64,28 +75,33 @@ func NewPrettyHandler(
 
 	return h
 }
-func NewLogger() *slog.Logger {
 
-	loggingLevel = new(slog.LevelVar)
+func NewLogger() *Logging {
+	loggingLevel := new(slog.LevelVar)
 	opts := slog.HandlerOptions{
 		Level: loggingLevel,
 	}
 	textHandler := NewPrettyHandler(os.Stdout, &opts)
-	logging = slog.New(textHandler)
-	return logging
+	log := &Logging{
+		Log:     slog.New(textHandler),
+		Handler: textHandler,
+		Level:   loggingLevel,
+		Opt:     &opts,
+	}
+	return log
 }
 
-func DebugLevel(debugLevel string) {
+func (l *Logging) DebugLevel(debugLevel string) {
 	switch debugLevel {
 	case "":
-		loggingLevel.Set(slog.LevelError)
+		l.Level.Set(slog.LevelError)
 	case "Error":
-		loggingLevel.Set(slog.LevelError)
+		l.Level.Set(slog.LevelError)
 	case "Warn":
-		loggingLevel.Set(slog.LevelWarn)
+		l.Level.Set(slog.LevelWarn)
 	case "Info":
-		loggingLevel.Set(slog.LevelInfo)
+		l.Level.Set(slog.LevelInfo)
 	case "Debug":
-		loggingLevel.Set(slog.LevelDebug)
+		l.Level.Set(slog.LevelDebug)
 	}
 }
