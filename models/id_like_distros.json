@@ -1,0 +1,288 @@
+{
+  "AIX": {
+    "ID": "",
+    "ID_LIKE": "",
+    "Package Manager": ""
+  },
+  "Alpine Linux": {
+    "ID": "alpine",
+    "ID_LIKE": "alpine",
+    "Package Manager": "apk"
+  },
+  "Amazon Linux": {
+    "ID": "amzn",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "Amazon Linux 2": {
+    "ID": "amzn2",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "Android": {
+    "ID": "",
+    "ID_LIKE": "",
+    "Package Manager": ""
+  },
+  "Antergos": {
+    "ID": "antergos",
+    "ID_LIKE": "arch",
+    "Package Manager": "pacman"
+  },
+  "Arch Linux": {
+    "ID": "arch",
+    "ID_LIKE": "arch",
+    "Package Manager": "pacman"
+  },
+  "Asianux": {
+    "ID": "asianux",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "BlackArch": {
+    "ID": "blackarch",
+    "ID_LIKE": "arch",
+    "Package Manager": "pacman"
+  },
+  "Bluewhite64": {
+    "ID": "bluewhite64",
+    "ID_LIKE": "slackware",
+    "Package Manager": "pkgtool"
+  },
+  "CentOS": {
+    "ID": "centos",
+    "ID_LIKE": "rhel fedora",
+    "Package Manager": "yum"
+  },
+  "CentOS Stream": {
+    "ID": "centos",
+    "ID_LIKE": "rhel fedora",
+    "Package Manager": "dnf"
+  },
+  "ClearOS": {
+    "ID": "clearos",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "CrunchBang": {
+    "ID": "crunchbang",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Debian": {
+    "ID": "debian",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Deepin": {
+    "ID": "deepin",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Devuan": {
+    "ID": "devuan",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Edubuntu": {
+    "ID": "edubuntu",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "elementary OS": {
+    "ID": "elementary",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Fedora": {
+    "ID": "fedora",
+    "ID_LIKE": "fedora",
+    "Package Manager": "dnf"
+  },
+  "FreeBSD": {
+    "ID": "freebsd",
+    "ID_LIKE": "",
+    "Package Manager": "pkg"
+  },
+  "Funtoo": {
+    "ID": "funtoo",
+    "ID_LIKE": "gentoo",
+    "Package Manager": "emerge"
+  },
+  "Gentoo": {
+    "ID": "gentoo",
+    "ID_LIKE": "gentoo",
+    "Package Manager": "emerge"
+  },
+  "GoboLinux": {
+    "ID": "gobolinux",
+    "ID_LIKE": "",
+    "Package Manager": "Compile"
+  },
+  "Kali Linux": {
+    "ID": "kali",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Knoppix": {
+    "ID": "knoppix",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "LFS": {
+    "ID": "lfs",
+    "ID_LIKE": "",
+    "Package Manager": ""
+  },
+  "Linux Mint": {
+    "ID": "linuxmint",
+    "ID_LIKE": "debian ubuntu",
+    "Package Manager": "apt"
+  },
+  "Mageia": {
+    "ID": "mageia",
+    "ID_LIKE": "mandriva",
+    "Package Manager": "urpmi"
+  },
+  "Mandriva": {
+    "ID": "mandriva",
+    "ID_LIKE": "mandriva",
+    "Package Manager": "urpmi"
+  },
+  "Manjaro": {
+    "ID": "manjaro",
+    "ID_LIKE": "arch",
+    "Package Manager": "pacman"
+  },
+  "MX Linux": {
+    "ID": "mx",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "NixOS": {
+    "ID": "nixos",
+    "ID_LIKE": "",
+    "Package Manager": "nix"
+  },
+  "OpenMandriva": {
+    "ID": "openmandriva",
+    "ID_LIKE": "mandriva",
+    "Package Manager": "dnf"
+  },
+  "openSUSE": {
+    "ID": "opensuse",
+    "ID_LIKE": "suse",
+    "Package Manager": "zypper"
+  },
+  "Oracle Linux": {
+    "ID": "oracle",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "Parrot OS": {
+    "ID": "parrot",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "PCLinuxOS": {
+    "ID": "pclinuxos",
+    "ID_LIKE": "mandriva",
+    "Package Manager": "apt"
+  },
+  "Peppermint": {
+    "ID": "peppermint",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Pop!_OS": {
+    "ID": "pop",
+    "ID_LIKE": "ubuntu debian",
+    "Package Manager": "apt"
+  },
+  "PureOS": {
+    "ID": "pureos",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Qubes OS": {
+    "ID": "qubes",
+    "ID_LIKE": "",
+    "Package Manager": "rpm dnf dom0"
+  },
+  "Raspbian": {
+    "ID": "raspbian",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Red Hat Enterprise Linux (RHEL)": {
+    "ID": "rhel",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "Rocks Cluster Distribution": {
+    "ID": "rocks",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "Sabayon": {
+    "ID": "sabayon",
+    "ID_LIKE": "gentoo",
+    "Package Manager": "equo"
+  },
+  "Scientific Linux": {
+    "ID": "scientific",
+    "ID_LIKE": "rhel",
+    "Package Manager": "yum"
+  },
+  "Slackware": {
+    "ID": "slackware",
+    "ID_LIKE": "slackware",
+    "Package Manager": "pkgtool"
+  },
+  "Solus": {
+    "ID": "solus",
+    "ID_LIKE": "solus",
+    "Package Manager": "eopkg"
+  },
+  "SUSE Linux Enterprise": {
+    "ID": "suse",
+    "ID_LIKE": "suse",
+    "Package Manager": "zypper"
+  },
+  "Tiny Core Linux": {
+    "ID": "tinycore",
+    "ID_LIKE": "",
+    "Package Manager": "tce-load"
+  },
+  "Trisquel": {
+    "ID": "trisquel",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Ubuntu": {
+    "ID": "ubuntu",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Univention Corporate Server": {
+    "ID": "univention",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Voyager Live": {
+    "ID": "voyager",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Xubuntu": {
+    "ID": "xubuntu",
+    "ID_LIKE": "debian",
+    "Package Manager": "apt"
+  },
+  "Zenwalk": {
+    "ID": "zenwalk",
+    "ID_LIKE": "slackware",
+    "Package Manager": "netpkg"
+  }
+}
+
