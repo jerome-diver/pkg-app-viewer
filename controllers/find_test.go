@@ -12,17 +12,17 @@ import (
 func Test_Find_cleanBytes(t *testing.T) {
 	to_test := []map[string]string{
 		{
-			"title":   "Have to find and remove '-y ' and all before",
+			"title":   "Have to find and remove '-y ' and all before\n",
 			"to_test": "text to delete -y ok that's it",
 			"want":    "ok that's it",
 		},
 		{
-			"title":   "Have to find and remove '-o <word>=<digit> '",
+			"title":   "Have to find and remove '-o <word>=<digit> '\n",
 			"to_test": "text to delete -y -o word=1 ok that's it",
 			"want":    "ok that's it",
 		},
 		{
-			"title":   "Have to find and remove any '-(-<word>)+ '",
+			"title":   "Have to find and remove any '-(-<word>)+ '\n",
 			"to_test": "text to delete -y --word-many-time --other-one-again ok that's it",
 			"want":    "ok that's it",
 		},
@@ -48,21 +48,21 @@ func Test_Find_installOccurenceFound(t *testing.T) {
 	}
 	to_test := []TestContent{
 		{
-			title:   "Have to clean and split to add to this.Packages",
+			title:   "Have to clean and split to add to this.Packages\n",
 			to_test: "text to delete -y one two three four",
 			search:  model.All,
 			want:    []string{"one", "two", "three", "four"},
 			clean:   true,
 		},
 		{
-			title:   "Have to not add if already exist'",
+			title:   "Have to not add if already exist\n",
 			to_test: "text to delete -y -o word=1 one five one one",
 			search:  model.All,
 			want:    []string{"one", "two", "three", "four", "five"},
 			clean:   false,
 		},
 		{
-			title:   "Have to add deb file only'",
+			title:   "Have to add deb file only\n",
 			to_test: "text to delete -y -o word=1 ./test.deb one one file.deb",
 			search:  model.FileSource,
 			want:    []string{"./test.deb", "file.deb"},
@@ -79,6 +79,32 @@ func Test_Find_installOccurenceFound(t *testing.T) {
 			ExportInstallOccurenceFound(f,
 				[]byte(data.to_test),
 				data.search.Algorythm())
+			So(f.Packages, ShouldEqual, data.want)
+		})
+	}
+}
+
+func Test_Find_removedOccurenceFound(t *testing.T) {
+	type TestContent struct {
+		title        string   // Test title
+		initPackages []string // initialize Find.Packages state
+		to_test      string   // string to test
+		want         []string // expected to get back
+	}
+	to_test := []TestContent{
+		{
+			title:        "Have to clean and split to remove found occurence from this.Pakages\n",
+			initPackages: []string{"one", "two", "./test.deb"},
+			to_test:      "text to delete -y one three four ./test.deb",
+			want:         []string{"two"},
+		},
+	}
+	l := view.NewLogger()
+	f := Finder(l)
+	for _, data := range to_test {
+		Convey(data.title, t, func() {
+			f.Packages = data.initPackages
+			ExportRemovedOccurenceFound(f, []byte(data.to_test))
 			So(f.Packages, ShouldEqual, data.want)
 		})
 	}

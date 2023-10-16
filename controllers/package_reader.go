@@ -58,7 +58,7 @@ func (p *Packages) Apt(searchFor model.Search) []string {
 		slog.String("searchFor", searchFor.String()))
 	if p.MenuModel.FileName != "" {
 		clearBytes := p.Tool.GetFileContent(p.MenuModel)
-		p.Find.AptInstalledFromHistory(clearBytes, searchFor)
+		p.Find.DebianPackagesToSearchFor(clearBytes, searchFor)
 	} else {
 		if p.MenuModel.DirName == "" {
 			p.MenuModel.DirName = "/var/log/apt"
@@ -67,7 +67,7 @@ func (p *Packages) Apt(searchFor model.Search) []string {
 		for _, file := range filesList {
 			p.MenuModel.FileName = file
 			clearBytes := p.Tool.GetFileContent(p.MenuModel)
-			p.Find.AptInstalledFromHistory(clearBytes, searchFor)
+			p.Find.DebianPackagesToSearchFor(clearBytes, searchFor)
 		}
 	}
 	switch searchFor {

@@ -74,69 +74,77 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 }
 
 /*
-  - Mode can be: [all, added, officialAdded, otherRepos, manual]
-
-    all:
+  - Mode can be: [All, Added, OfficialRepos, OtherRepos, FileSource]
+    Methods are:
+    All:
     |	apt install - apt remove
-    |	occurence inside histoy.log files (gz included)
+    |	occurence inside history.log files (gz included)
 
-    added:
+    Added:
     |	apt install - apt remove
     |	occurence inside histoy.log files (gz included)
     |	followed by line contains "Requested-by:"
 
-    officialAdded:
+    OfficialAdded:
     |
 
-    otherRepos:
+    OtherRepos:
     |
 
-    manual:
+    FileSource:
     |	apt install - apt remove
-    |	occurence inside histoy.log files (gz included)
-    |	but package name should match for a "".deb" file
-    |	to rich this, a "func(string)bool" is passed through params
+    |	occurence inside history.log files (gz included)
+    |	but package name should match for a ".deb" file
+    |	to rich this, a model.Search type indication is linked
 
 *
 */
-func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
-	f.logger.Log.Info("Start function AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
+func (f *Find) DebianPackagesToSearchFor(rawHistory []byte, mode model.Search) {
+	f.logger.Log.Debug("Start (*Find).AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
 	scanner := bufio.NewScanner(bytes.NewReader(rawHistory))
 	const maxCapacity = 512 * 1024
 	buf := make([]byte, maxCapacity)
 	scanner.Buffer(buf, maxCapacity)
 	scanner.Split(bufio.ScanLines)
-	var ipl []byte
+	installed_words := []string{
+		"apt install ", "apt-get install ",
+	}
+	removed_words := []string{
+		"apt remove ", "apt-get remove ",
+	}
+	var found bool
+	var after []byte // need to be outside because of User management detection
+scanner:
 	for scanner.Scan() {
 		b := scanner.Bytes()
-		if mode == model.Added {
-			if _, _, found := bytes.Cut(b, []byte("Requested-by: ")); found {
-				f.installOccurenceFound(ipl, mode.Algorythm())
+		if mode == model.Added { // find User managed package
+			if _, user, found := bytes.Cut(b, []byte("Requested-by: ")); found {
+				f.logger.Log.Debug("find apt 'Requested-by: ' occurence (user management)",
+					slog.String("CutAfter", string(user)))
+				f.installOccurenceFound(after, mode.Algorythm())
+				continue // next scan
 			}
 		}
 		// detect, cut and separate apt install list packages
-		if _, ipl, found := bytes.Cut(b, []byte("apt-get install ")); found {
-			f.logger.Log.Debug("find apt-get install occurence",
-				slog.String("CutAfter", string(ipl)))
-			if mode == model.All || mode == model.FileSource {
-				f.installOccurenceFound(ipl, mode.Algorythm())
+		for _, install := range installed_words {
+			if _, after, found = bytes.Cut(b, []byte(install)); found {
+				f.logger.Log.Debug("find apt-get install occurence",
+					slog.String("CutAfter", string(after)))
+				if mode == model.All || mode == model.FileSource {
+					f.installOccurenceFound(after, mode.Algorythm())
+				}
+				continue scanner // next scan if treated
 			}
-			continue // next scan if treated there as "apt install" line detected
-		}
-		if _, ipl, found := bytes.Cut(b, []byte("apt install ")); found {
-			f.logger.Log.Debug("find apt install occurence",
-				slog.String("CutAfter", string(ipl)))
-			f.installOccurenceFound(ipl, mode.Algorythm())
-			continue // next scan if treated there as "apt install" line detected
 		}
 		// detect, cut and separate apt remove list packages
-		if _, removed_potential_list, found := bytes.Cut(b, []byte("apt remove ")); found {
-			f.logger.Log.Warn("find apt remove occurence",
-				slog.String("CutAfter", string(removed_potential_list)))
-			f.removedOccurenceFound(removed_potential_list)
-			continue // next scan if treated there as "apt remove" line detected
+		for _, remove := range removed_words {
+			if _, after, found = bytes.Cut(b, []byte(remove)); found {
+				f.logger.Log.Debug("find apt remove occurence",
+					slog.String("CutAfter", string(after)))
+				f.removedOccurenceFound(after)
+				continue scanner // next scan if treated
+			}
 		}
-
 	}
 	f.logger.Error = scanner.Err()
 	f.logger.CheckError("Scanner error at history time")
