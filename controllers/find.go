@@ -24,18 +24,18 @@ func Finder(logger *view.Logging) *Find {
 
 func (f *Find) cleanBytes(ipl []byte) []byte {
 	// find "-y ", "-o <word>=\d", "-<-word>+"
-	re_parser := regexp.MustCompile(`.*(\-y\s)|(\-o\s.*\=\d\s)*(\-(\-\w*)+\s)*(.*)`)
+	re_parser := regexp.MustCompile(`^.* (\-y)* *(\-o \w+\=\d)* *(\-(\-\w+)+)* +(.*)$`)
 	clean := re_parser.ReplaceAllString(string(ipl), "$5")
 	f.logger.Log.Debug("cleaned ipl", slog.String("ipl", clean))
 	return []byte(clean)
 }
 
-func (f *Find) installOccurenceFound(ipl []byte, comp func(string) bool) {
-	//remove unexpected content words
+func (f *Find) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
+	// remove unexpected content words
 	ipl_clean := f.cleanBytes(ipl)
-	//and split words
+	// and split words
 	splited_list := bytes.SplitAfter(ipl_clean, []byte(" "))
-	//to add to packages bytes if not already present
+	// to add to this Packages string slice if missing
 	for _, w := range splited_list {
 		clean_w := bytes.Trim(w, " ")
 		sclean_w := string(clean_w)
@@ -46,10 +46,10 @@ func (f *Find) installOccurenceFound(ipl []byte, comp func(string) bool) {
 		if len(clean_w) == 0 {
 			continue
 		}
-		if comp(sclean_w) {
+		if algorythm(sclean_w) {
 			f.Packages = append(f.Packages, sclean_w)
+			f.logger.Log.Info("added to packages []string", slog.String("name", sclean_w))
 		}
-		f.logger.Log.Info("added to packages []string", slog.String("name", sclean_w))
 	}
 }
 
@@ -100,19 +100,6 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 *
 */
 func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
-	var cmp func(string) bool
-	switch mode {
-	case model.All:
-		cmp = func(p string) bool { return true }
-	case model.Added:
-		cmp = func(p string) bool { return true }
-	case model.FileSource:
-		cmp = func(p string) bool {
-			re := regexp.MustCompile(`.*\.deb$`)
-			ok := re.MatchString(p)
-			return ok
-		}
-	}
 	f.logger.Log.Info("Start function AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
 	scanner := bufio.NewScanner(bytes.NewReader(rawHistory))
 	const maxCapacity = 512 * 1024
@@ -124,7 +111,7 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
 		b := scanner.Bytes()
 		if mode == model.Added {
 			if _, _, found := bytes.Cut(b, []byte("Requested-by: ")); found {
-				f.installOccurenceFound(ipl, cmp)
+				f.installOccurenceFound(ipl, mode.Algorythm())
 			}
 		}
 		// detect, cut and separate apt install list packages
@@ -132,14 +119,14 @@ func (f *Find) AptInstalledFromHistory(rawHistory []byte, mode model.Search) {
 			f.logger.Log.Debug("find apt-get install occurence",
 				slog.String("CutAfter", string(ipl)))
 			if mode == model.All || mode == model.FileSource {
-				f.installOccurenceFound(ipl, cmp)
+				f.installOccurenceFound(ipl, mode.Algorythm())
 			}
 			continue // next scan if treated there as "apt install" line detected
 		}
 		if _, ipl, found := bytes.Cut(b, []byte("apt install ")); found {
 			f.logger.Log.Debug("find apt install occurence",
 				slog.String("CutAfter", string(ipl)))
-			f.installOccurenceFound(ipl, cmp)
+			f.installOccurenceFound(ipl, mode.Algorythm())
 			continue // next scan if treated there as "apt install" line detected
 		}
 		// detect, cut and separate apt remove list packages

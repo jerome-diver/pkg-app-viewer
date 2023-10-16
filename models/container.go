@@ -1,5 +1,7 @@
 package model
 
+import "regexp"
+
 type CommandRun int8
 
 const (
@@ -86,6 +88,18 @@ func (s Search) String() string {
 		return "FileSource"
 	}
 	return "unknown"
+}
+
+func (s Search) Algorythm() func(string) bool {
+	switch s {
+	case FileSource:
+		return func(p string) bool {
+			re := regexp.MustCompile(`.*\.deb$`)
+			return re.MatchString(p)
+		}
+	default:
+		return func(p string) bool { return true }
+	}
 }
 
 type List struct {
