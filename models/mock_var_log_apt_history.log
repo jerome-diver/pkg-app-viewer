@@ -1,0 +1,39 @@
+Start-Date: 2023-09-17  04:18:17
+Commandline: apt install anydesk
+Requested-By: dge (1000)
+Install: anydesk:amd64 (6.3.0), libgtkglext1:amd64 (1.2.0-11, automatic)
+End-Date: 2023-09-17  04:18:19
+
+Commandline: apt install sift
+Requested-By: dge (1000)
+Install: libblimps3:amd64 (3.9+ds-1, automatic), csh:amd64 (20110502-7, automatic), blimps-utils:amd64 (3.9+ds-1, automatic), sift:amd64 (4.0.3b-6)
+End-Date: 2023-09-27  07:15:37
+
+Start-Date: 2023-09-27  07:18:24
+Commandline: apt install siftool
+Requested-By: dge (1000)
+Install: siftool:amd64 (1.0.9-2.1build1)
+End-Date: 2023-09-27  07:18:24
+
+Start-Date: 2023-09-27  07:20:05
+Commandline: apt remove sift
+Requested-By: dge (1000)
+Remove: sift:amd64 (4.0.3b-6)
+End-Date: 2023-09-27  07:20:06
+
+Start-Date: 2022-11-02  18:27:44
+Commandline: apt-get install -y -o Acquire::cdrom::AutoDetect=0 -o Acquire::cdrom::mount=/cdrom -o APT::CDROM::NoMount=1 grub-common grub2-common grub-pc btrfs-progs e2fsprogs ntfs-3g
+Install: grub-pc-bin:amd64 (2.06-2ubuntu7, automatic), grub-gfxpayload-lists:amd64 (0.7, automatic), grub-pc:amd64 (2.06-2ubuntu7)
+End-Date: 2022-11-02  18:27:45
+
+Start-Date: 2022-09-22  15:05:38
+Commandline: apt-get install -y system76-acpi-dkms system76-dkms system76-io-dkms amd-ppt-bin nvidia-driver-515
+Install: libvulkan1:i386 (1.3.204.1-2, automatic), libxcb-present0:i386 (1.14-3ubuntu3, automatic), libkeyutils1:i386 (1.6.1-2ubuntu3, automatic), libxnvctrl0:amd64 (510.47.03-0ubuntu1, automatic), libnvidia-common-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libxxf86vm1:i386 (1:1.1.4-1build3, automatic), libnvidia-fbc1-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-fbc1-515:i386 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), krb5-locales:amd64 (1.19.2-2, automatic), libffi8:i386 (3.4.2-4, automatic), libgssapi-krb5-2:i386 (1.19.2-2, automatic), libnvidia-gl-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-gl-515:i386 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libglx-mesa0:i386 (22.0.5-0ubuntu0.1, automatic), libnvidia-extra-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libglvnd0:i386 (1.4.0-1, automatic), nvidia-compute-utils-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), nvidia-dkms-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), nvidia-driver-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41), libtinfo6:i386 (6.3-2, automatic), libx11-xcb1:i386 (2:1.7.5-1, automatic), libxshmfence1:i386 (1.3-1build4, automatic), libunistring2:i386 (1.0-1, automatic), libidn2-0:i386 (2.3.2-2build1, automatic), system76-io-dkms:amd64 (1.0.2~1655490480~22.04~0217576), dctrl-tools:amd64 (2.24-3build2, automatic), liblzma5:i386 (5.2.5-2ubuntu1, automatic), libnvidia-encode-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-encode-515:i386 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libxcb-dri2-0:i386 (1.14-3ubuntu3, automatic), libxcb-dri3-0:i386 (1.14-3ubuntu3, automatic), nvidia-utils-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libexpat1:i386 (2.4.7-1, automatic), xserver-xorg-video-nvidia-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libglx0:i386 (1.4.0-1, automatic), libdrm-nouveau2:i386 (2.4.110-1pop0~1648761328~22.04~166056a, automatic), libxau6:i386 (1:1.0.9-1build5, automatic), libxcb1:i386 (1.14-3ubuntu3, automatic), libllvm13:i386 (1:13.0.1-2ubuntu2.1, automatic), amd-ppt-bin:amd64 (1.0.0~1609862600~22.04~1b80593), libkrb5support0:i386 (1.19.2-2, automatic), libxml2:i386 (2.9.13+dfsg-1ubuntu0.1, automatic), libzstd1:i386 (1.4.8+dfsg-3build1, automatic), libbsd0:i386 (0.11.5-1, automatic), libnvidia-decode-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-decode-515:i386 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-egl-wayland1:amd64 (1:1.1.9-1.1, automatic), libgl1-mesa-dri:i386 (22.0.5-0ubuntu0.1, automatic), libcom-err2:i386 (1.46.5-2ubuntu1.1, automatic), nvidia-kernel-common-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libc6:i386 (2.35-0ubuntu3.1, automatic), libssl3:i386 (3.0.2-0ubuntu1.6, automatic), libkrb5-3:i386 (1.19.2-2, automatic), libnss-nisplus:i386 (1.3-0ubuntu6, automatic), mesa-vulkan-drivers:i386 (22.0.5-0ubuntu0.1, automatic), libnsl2:i386 (1.3.0-2build2, automatic), libk5crypto3:i386 (1.19.2-2, automatic), screen-resolution-extra:amd64 (0.18.2, automatic), nvidia-settings:amd64 (510.47.03-0ubuntu1, automatic), libcrypt1:i386 (1:4.4.27-1, automatic), libxcb-glx0:i386 (1.14-3ubuntu3, automatic), libglapi-mesa:i386 (22.0.5-0ubuntu0.1, automatic), libdrm-amdgpu1:i386 (2.4.110-1pop0~1648761328~22.04~166056a, automatic), libdrm-radeon1:i386 (2.4.110-1pop0~1648761328~22.04~166056a, automatic), libdrm2:i386 (2.4.110-1pop0~1648761328~22.04~166056a, automatic), libsensors5:i386 (1:3.6.0-7ubuntu1, automatic), libxcb-randr0:i386 (1.14-3ubuntu3, automatic), libnss-nis:i386 (3.1-0ubuntu6, automatic), libxext6:i386 (2:1.3.4-1build1, automatic), libnvidia-cfg1-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), nvidia-kernel-source-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-compute-515:amd64 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libnvidia-compute-515:i386 (515.65.01-1pop0~1663626642~22.04~1f94f41, automatic), libxcb-shm0:i386 (1.14-3ubuntu3, automatic), libgl1:i386 (1.4.0-1, automatic), zlib1g:i386 (1:1.2.11.dfsg-2ubuntu9.1, automatic), libx11-6:i386 (2:1.7.5-1, automatic), libwayland-client0:i386 (1.20.0-1ubuntu0.1, automatic), gcc-12-base:i386 (12.1.0-2ubuntu1~22.04, automatic), system76-acpi-dkms:amd64 (1.0.2~1659568831~22.04~a88dcce), libelf1:i386 (0.186-1build1, automatic), libmd0:i386 (1.0.4-1build1, automatic), libtirpc3:i386 (1.3.2-2ubuntu0.1, automatic), libxcb-sync1:i386 (1.14-3ubuntu3, automatic), libedit2:i386 (3.1-20210910-1build1, automatic), libicu70:i386 (70.1-2, automatic), system76-dkms:amd64 (1.0.14~1643391291~22.04~78ede46), libxfixes3:i386 (1:6.0.0-1, automatic), libstdc++6:i386 (12.1.0-2ubuntu1~22.04, automatic), libxdmcp6:i386 (1:1.1.3-0ubuntu5, automatic), libatomic1:i386 (12.1.0-2ubuntu1~22.04, automatic), dkms:amd64 (2.8.7-2ubuntu2, automatic), libxcb-xfixes0:i386 (1.14-3ubuntu3, automatic), libgcc-s1:i386 (12.1.0-2ubuntu1~22.04, automatic)
+End-Date: 2022-09-22  15:07:15
+
+Start-Date: 2023-10-09  12:16:23
+Commandline: apt install ./openrgb_0.9_amd64_bookworm_b5f46e3.deb
+Requested-By: dge (1000)
+Install: openrazer-driver-dkms:amd64 (3.2.0+dfsg-3, automatic), openrgb:amd64 (0.9.0)
+End-Date: 2023-10-09  12:16:37
+
