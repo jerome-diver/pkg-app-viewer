@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 
 	controller "github.com/pkg-app-viewer/controllers"
 	view "github.com/pkg-app-viewer/views"
@@ -16,11 +17,12 @@ var packages *controller.Packages
 
 func init() {
 	logger = view.NewLogger()
-	//viper.SetConfigFile("/home/dge/.config/pkg-app-viewer.config.yml")
 	config := viper.New()
+	var home_dir string
+	home_dir, logger.Error = os.UserHomeDir()
 	config.SetConfigName("config")
 	config.SetConfigType("yaml")
-	config.AddConfigPath("/home/dge/.config/pkg-app-viewer")
+	config.AddConfigPath(home_dir + "/.config/pkg-app-viewer")
 	err := config.ReadInConfig()
 	if err != nil {
 		logger.Log.Error("can not unmarshall config file", slog.String("err", err.Error()))

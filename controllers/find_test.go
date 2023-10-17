@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"os"
 	"testing"
 
 	. "github.com/pkg-app-viewer/controllers"
@@ -25,6 +26,11 @@ func Test_Find_cleanBytes(t *testing.T) {
 			"title":   "Have to find and remove any '-(-<word>)+ '\n",
 			"to_test": "text to delete -y --word-many-time --other-one-again ok that's it",
 			"want":    "ok that's it",
+		},
+		{
+			"title":   "Have to let go simple word that doesn't match\n",
+			"to_test": "simple word",
+			"want":    "simple word",
 		},
 	}
 	l := view.NewLogger()
@@ -106,6 +112,43 @@ func Test_Find_removedOccurenceFound(t *testing.T) {
 			f.Packages = data.initPackages
 			ExportRemovedOccurenceFound(f, []byte(data.to_test))
 			So(f.Packages, ShouldEqual, data.want)
+		})
+	}
+}
+
+func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
+	pwd_dir, err := os.Getwd()
+	if err != nil {
+		panic(err.Error())
+	}
+	type TestContent struct {
+		title    string
+		search   model.Search
+		fileName string
+		want     []string
+	}
+	to_test := []TestContent{
+		{
+			title:    "Extract Debian packages with mode All from mocked log file",
+			search:   model.All,
+			fileName: pwd_dir + "/../models/mock_var_log_apt_history.log",
+			want: []string{
+				"anydesk", "siftool", "grub-common",
+				"grub2-common", "grub-pc", "btrfs-progs",
+				"e2fsprogs", "ntfs-3g", "system76-acpi-dkms",
+				"system76-dkms", "system76-io-dkms", "amd-ppt-bin",
+				"nvidia-driver-515", "./openrgb_0.9_amd64_bookworm_b5f46e3.deb",
+			},
+		},
+	}
+	l := view.NewLogger()
+	f := Finder(l)
+	for _, test := range to_test {
+		rawHistory, _ := os.ReadFile(test.fileName)
+		Convey(test.title, t, func() {
+			f.Packages = []string{}
+			f.DebianPackagesToSearchFor(rawHistory, test.search)
+			So(f.Packages, ShouldEqual, test.want)
 		})
 	}
 }

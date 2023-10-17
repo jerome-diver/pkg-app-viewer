@@ -23,9 +23,17 @@ func Finder(logger *view.Logging) *Find {
 }
 
 func (f *Find) cleanBytes(ipl []byte) []byte {
-	// find "-y ", "-o <word>=\d", "-<-word>+"
-	re_parser := regexp.MustCompile(`^.* (\-y)* *(\-o \w+\=\d)* *(\-(\-\w+)+)* +(.*)$`)
-	clean := re_parser.ReplaceAllString(string(ipl), "$5")
+	_, after, found := bytes.Cut(ipl, []byte("-y "))
+	var first_pass []byte
+	if found {
+		first_pass = after
+	} else {
+		first_pass = ipl
+	}
+	re_parser := regexp.MustCompile(`(\-o [\w\:]*\=[\d\/\w]*)+\s`)
+	second_pass := re_parser.ReplaceAllString(string(first_pass), "")
+	re_parser = regexp.MustCompile(`(\-(\-\w+)+)+\s`)
+	clean := re_parser.ReplaceAllString(string(second_pass), "")
 	f.logger.Log.Debug("cleaned ipl", slog.String("ipl", clean))
 	return []byte(clean)
 }
@@ -40,7 +48,7 @@ func (f *Find) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
 		clean_w := bytes.Trim(w, " ")
 		sclean_w := string(clean_w)
 		if slices.Contains(f.Packages, sclean_w) {
-			f.logger.Log.Warn("already listed in packages []string", slog.String("name", sclean_w))
+			f.logger.Log.Debug("already listed in packages []string", slog.String("name", sclean_w))
 			continue
 		}
 		if len(clean_w) == 0 {
@@ -48,7 +56,7 @@ func (f *Find) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
 		}
 		if algorythm(sclean_w) {
 			f.Packages = append(f.Packages, sclean_w)
-			f.logger.Log.Info("added to packages []string", slog.String("name", sclean_w))
+			f.logger.Log.Debug("added to packages []string", slog.String("name", sclean_w))
 		}
 	}
 }
@@ -66,7 +74,7 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 		}
 		find_index := slices.Index(f.Packages, string(clean_w))
 		if find_index != -1 {
-			f.logger.Log.Warn("found occurence to delete in packages []string", slog.String("name", string(clean_w)))
+			f.logger.Log.Debug("found occurence to delete in packages []string", slog.String("name", string(clean_w)))
 			last := find_index + 1
 			f.Packages = slices.Delete(f.Packages, find_index, last)
 		}
