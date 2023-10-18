@@ -129,7 +129,7 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 	}
 	to_test := []TestContent{
 		{
-			title:    "Extract Debian packages with mode All from mocked log file",
+			title:    "Extract Debian packages with mode All from mocked log file\n",
 			search:   model.All,
 			fileName: pwd_dir + "/../models/mock_var_log_apt_history.log",
 			want: []string{
@@ -138,6 +138,33 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 				"e2fsprogs", "ntfs-3g", "system76-acpi-dkms",
 				"system76-dkms", "system76-io-dkms", "amd-ppt-bin",
 				"nvidia-driver-515", "./openrgb_0.9_amd64_bookworm_b5f46e3.deb",
+			},
+		},
+		{
+			title:    "Extract Debian packages with mode FileSource from mocked log file\n",
+			search:   model.FileSource,
+			fileName: pwd_dir + "/../models/mock_var_log_apt_history.log",
+			want: []string{
+				"./openrgb_0.9_amd64_bookworm_b5f46e3.deb",
+			},
+		},
+		{
+			title:    "Extract Debian packages with mode Added from mocked log file\n",
+			search:   model.Added,
+			fileName: pwd_dir + "/../models/mock_var_log_apt_history.log",
+			want: []string{
+				"anydesk", "siftool", "./openrgb_0.9_amd64_bookworm_b5f46e3.deb",
+			},
+		},
+		{
+			title:    "Extract Debian packages with mode OfficialAdded from mocked log file\n",
+			search:   model.All,
+			fileName: pwd_dir + "/../models/mock_var_log_apt_history.log",
+			want: []string{
+				"grub-common", "grub2-common", "grub-pc", "btrfs-progs",
+				"e2fsprogs", "ntfs-3g", "system76-acpi-dkms",
+				"system76-dkms", "system76-io-dkms", "amd-ppt-bin",
+				"nvidia-driver-515",
 			},
 		},
 	}

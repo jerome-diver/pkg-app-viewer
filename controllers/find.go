@@ -85,22 +85,24 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
   - Mode can be: [All, Added, OfficialRepos, OtherRepos, FileSource]
     Methods are:
     All:
-    |	apt install - apt remove
+    |	apt install - apt remove (or apt-get)
     |	occurence inside history.log files (gz included)
 
     Added:
-    |	apt install - apt remove
+    |	apt install - apt remove (or apt-get)
     |	occurence inside histoy.log files (gz included)
-    |	followed by line contains "Requested-by:"
+    |	followed by line contains "Requested-By: "
 
     OfficialAdded:
-    |
+    |	apt install - apt remove (or apt-get)
+    |   occurence inside history.log files (gz included)
+    |   all that misss line "Requested-By: "
 
     OtherRepos:
     |
 
     FileSource:
-    |	apt install - apt remove
+    |	apt install - apt remove (or apt-get)
     |	occurence inside history.log files (gz included)
     |	but package name should match for a ".deb" file
     |	to rich this, a model.Search type indication is linked
@@ -122,20 +124,30 @@ func (f *Find) DebianPackagesToSearchFor(rawHistory []byte, mode model.Search) {
 	}
 	var found bool
 	var after []byte // need to be outside because of User management detection
+	var to_install bool
+	var to_remove bool
 scanner:
 	for scanner.Scan() {
 		b := scanner.Bytes()
 		if mode == model.Added { // find User managed package
-			if _, user, found := bytes.Cut(b, []byte("Requested-by: ")); found {
+			if _, user, found := bytes.Cut(b, []byte("Requested-By: ")); found {
 				f.logger.Log.Debug("find apt 'Requested-by: ' occurence (user management)",
-					slog.String("CutAfter", string(user)))
-				f.installOccurenceFound(after, mode.Algorythm())
+					slog.String("user", string(user)),
+					slog.String("to Add (previous var after)", string(after)))
+				if to_install {
+					f.installOccurenceFound(after, mode.Algorythm())
+				}
+				if to_remove {
+					f.removedOccurenceFound(after)
+				}
 				continue // next scan
 			}
 		}
 		// detect, cut and separate apt install list packages
 		for _, install := range installed_words {
+			to_install = false
 			if _, after, found = bytes.Cut(b, []byte(install)); found {
+				to_install = true
 				f.logger.Log.Debug("find apt-get install occurence",
 					slog.String("CutAfter", string(after)))
 				if mode == model.All || mode == model.FileSource {
@@ -146,7 +158,9 @@ scanner:
 		}
 		// detect, cut and separate apt remove list packages
 		for _, remove := range removed_words {
+			to_remove = false
 			if _, after, found = bytes.Cut(b, []byte(remove)); found {
+				to_remove = true
 				f.logger.Log.Debug("find apt remove occurence",
 					slog.String("CutAfter", string(after)))
 				f.removedOccurenceFound(after)
