@@ -88,20 +88,21 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
     |	apt install - apt remove (or apt-get)
     |	occurence inside history.log files (gz included)
 
-    Added:
+    Added:  (all added bu user)
     |	apt install - apt remove (or apt-get)
     |	occurence inside histoy.log files (gz included)
     |	followed by line contains "Requested-By: "
 
-    OfficialAdded:
-    |	apt install - apt remove (or apt-get)
-    |   occurence inside history.log files (gz included)
-    |   all that misss line "Requested-By: "
+    OfficialAdded: (all official added by user)
+    |   substract OtherRepos result from Added one modes to rich your content
 
-    OtherRepos:
-    |
+    OtherRepos: (all non official added by user)
+    |   find repo.sources.list from /etc/apt/sources.list.d/
+    |   search content of each repo from /var/lib/atp/lists/repo_pkg_nameè_Packages files
+    |   should find indication after "Package: " tagged line
+    |   AND ????
 
-    FileSource:
+    FileSource: (added by user from deb file)
     |	apt install - apt remove (or apt-get)
     |	occurence inside history.log files (gz included)
     |	but package name should match for a ".deb" file
