@@ -1,9 +1,4 @@
 {
-  "AIX": {
-    "ID": "",
-    "ID_LIKE": "",
-    "Package Manager": ""
-  },
   "Alpine Linux": {
     "ID": "alpine",
     "ID_LIKE": "alpine",
@@ -12,17 +7,12 @@
   "Amazon Linux": {
     "ID": "amzn",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "Amazon Linux 2": {
     "ID": "amzn2",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
-  },
-  "Android": {
-    "ID": "",
-    "ID_LIKE": "",
-    "Package Manager": ""
+    "Package Manager": "rpm"
   },
   "Antergos": {
     "ID": "antergos",
@@ -37,7 +27,7 @@
   "Asianux": {
     "ID": "asianux",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "BlackArch": {
     "ID": "blackarch",
@@ -52,7 +42,7 @@
   "CentOS": {
     "ID": "centos",
     "ID_LIKE": "rhel fedora",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "CentOS Stream": {
     "ID": "centos",
@@ -62,37 +52,37 @@
   "ClearOS": {
     "ID": "clearos",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "CrunchBang": {
     "ID": "crunchbang",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Debian": {
     "ID": "debian",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Deepin": {
     "ID": "deepin",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Devuan": {
     "ID": "devuan",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Edubuntu": {
     "ID": "edubuntu",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "elementary OS": {
     "ID": "elementary",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Fedora": {
     "ID": "fedora",
@@ -122,12 +112,12 @@
   "Kali Linux": {
     "ID": "kali",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Knoppix": {
     "ID": "knoppix",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "LFS": {
     "ID": "lfs",
@@ -137,7 +127,7 @@
   "Linux Mint": {
     "ID": "linuxmint",
     "ID_LIKE": "debian ubuntu",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Mageia": {
     "ID": "mageia",
@@ -157,7 +147,7 @@
   "MX Linux": {
     "ID": "mx",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "NixOS": {
     "ID": "nixos",
@@ -177,32 +167,32 @@
   "Oracle Linux": {
     "ID": "oracle",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "Parrot OS": {
     "ID": "parrot",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "PCLinuxOS": {
     "ID": "pclinuxos",
     "ID_LIKE": "mandriva",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Peppermint": {
     "ID": "peppermint",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Pop!_OS": {
     "ID": "pop",
     "ID_LIKE": "ubuntu debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "PureOS": {
     "ID": "pureos",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Qubes OS": {
     "ID": "qubes",
@@ -212,17 +202,17 @@
   "Raspbian": {
     "ID": "raspbian",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Red Hat Enterprise Linux (RHEL)": {
     "ID": "rhel",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "Rocks Cluster Distribution": {
     "ID": "rocks",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "Sabayon": {
     "ID": "sabayon",
@@ -232,7 +222,7 @@
   "Scientific Linux": {
     "ID": "scientific",
     "ID_LIKE": "rhel",
-    "Package Manager": "yum"
+    "Package Manager": "rpm"
   },
   "Slackware": {
     "ID": "slackware",
@@ -257,27 +247,27 @@
   "Trisquel": {
     "ID": "trisquel",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Ubuntu": {
     "ID": "ubuntu",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Univention Corporate Server": {
     "ID": "univention",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Voyager Live": {
     "ID": "voyager",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Xubuntu": {
     "ID": "xubuntu",
     "ID_LIKE": "debian",
-    "Package Manager": "apt"
+    "Package Manager": "dpkg"
   },
   "Zenwalk": {
     "ID": "zenwalk",

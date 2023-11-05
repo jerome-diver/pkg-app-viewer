@@ -1,12 +1,11 @@
-package controller_test
+package engine_test
 
 import (
 	"os"
 	"testing"
 
-	. "github.com/pkg-app-viewer/controllers"
+	. "github.com/pkg-app-viewer/controllers/engine"
 	model "github.com/pkg-app-viewer/models"
-	view "github.com/pkg-app-viewer/views"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -33,8 +32,7 @@ func Test_Find_cleanBytes(t *testing.T) {
 			"want":    "simple word",
 		},
 	}
-	l := view.NewLogger()
-	f := Finder(l)
+	f := NewAptHistory()
 	for _, data := range to_test {
 		Convey(data["title"], t, func() {
 			So(ExportCleanBytes(f, []byte(data["to_test"])),
@@ -46,11 +44,11 @@ func Test_Find_cleanBytes(t *testing.T) {
 
 func Test_Find_installOccurenceFound(t *testing.T) {
 	type TestContent struct {
-		title   string       // Test title
-		to_test string       // string to test
-		search  model.Search // comparator algorythm model [All, Added,OfficialRepos, OtherRepos, FileSource]
-		want    []string     // expected to get back
-		clean   bool         // initialize Find.Packages ?
+		title   string             // Test title
+		to_test string             // string to test
+		search  model.SystemOption // comparator algorythm model [All, Added,OfficialRepos, OtherRepos, FileSource]
+		want    []string           // expected to get back
+		clean   bool               // initialize Find.Packages ?
 	}
 	to_test := []TestContent{
 		{
@@ -75,8 +73,7 @@ func Test_Find_installOccurenceFound(t *testing.T) {
 			clean:   true,
 		},
 	}
-	l := view.NewLogger()
-	f := Finder(l)
+	f := NewAptHistory()
 	for _, data := range to_test {
 		Convey(data.title, t, func() {
 			if data.clean { // initialize list of Packages found
@@ -105,8 +102,7 @@ func Test_Find_removedOccurenceFound(t *testing.T) {
 			want:         []string{"two"},
 		},
 	}
-	l := view.NewLogger()
-	f := Finder(l)
+	f := NewAptHistory()
 	for _, data := range to_test {
 		Convey(data.title, t, func() {
 			f.Packages = data.initPackages
@@ -123,7 +119,7 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 	}
 	type TestContent struct {
 		title    string
-		search   model.Search
+		search   model.SystemOption
 		fileName string
 		want     []string
 	}
@@ -150,7 +146,7 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 		},
 		{
 			title:    "Extract Debian packages with mode Added from mocked log file\n",
-			search:   model.Added,
+			search:   model.User,
 			fileName: pwd_dir + "/../models/mock_var_log_apt_history.log",
 			want: []string{
 				"anydesk", "siftool", "./openrgb_0.9_amd64_bookworm_b5f46e3.deb",
@@ -168,8 +164,7 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 			},
 		},
 	}
-	l := view.NewLogger()
-	f := Finder(l)
+	f := NewAptHistory()
 	for _, test := range to_test {
 		rawHistory, _ := os.ReadFile(test.fileName)
 		Convey(test.title, t, func() {

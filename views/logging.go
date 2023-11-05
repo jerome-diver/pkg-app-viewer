@@ -16,18 +16,81 @@ type PrettyHandler struct {
 	l *log.Logger
 }
 
-type Logging struct { // proxy to add methd checkError
-	Error   error
-	Log     *slog.Logger
+type Logging interface {
+	SetError(error)
+	GetError() error
+	CheckError(string) bool
+	DebugLevel(string)
+	Log(msg string, args ...any)
+	Info(msg string, args ...any)
+	Debug(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
+}
+
+type logging struct { // proxy to add methd checkError
+	*slog.Logger
+	Err     error
 	Handler *PrettyHandler
 	Level   *slog.LevelVar
 	Opt     *slog.HandlerOptions
 }
 
-func (l *Logging) CheckError(msg string) {
-	if l.Error != nil {
-		l.Log.Error(msg, slog.String("err", l.Error.Error()))
+var single_log Logging
+
+func (l logging) SetError(err error) {
+	l.Err = err
+}
+
+func (l logging) GetError() error {
+	return l.Err
+}
+
+func (l logging) CheckError(msg string) bool {
+	if l.Err != nil {
+		if os.IsNotExist(l.Err) {
+			l.Warn("file doesn't exist")
+		} else {
+			l.Error(msg, slog.String("err", l.Err.Error()))
+		}
+		return true
 	}
+	return false
+}
+
+func (l logging) DebugLevel(debugLevel string) {
+	switch debugLevel {
+	case "":
+		l.Level.Set(slog.LevelError)
+	case "Error":
+		l.Level.Set(slog.LevelError)
+	case "Warn":
+		l.Level.Set(slog.LevelWarn)
+	case "Info":
+		l.Level.Set(slog.LevelInfo)
+	case "Debug":
+		l.Level.Set(slog.LevelDebug)
+	}
+}
+
+func (l logging) Log(msg string, args ...any) {
+	l.Log(msg, args)
+}
+
+func (l logging) Info(msg string, args ...any) {
+	l.Info(msg, args)
+}
+
+func (l logging) Debug(msg string, args ...any) {
+	l.Debug(msg, args)
+}
+
+func (l logging) Warn(msg string, args ...any) {
+	l.Warn(msg, args)
+}
+
+func (l logging) Error(msg string, args ...any) {
+	l.Error(msg, args)
 }
 
 func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
@@ -76,32 +139,20 @@ func NewPrettyHandler(
 	return h
 }
 
-func NewLogger() *Logging {
-	loggingLevel := new(slog.LevelVar)
-	opts := slog.HandlerOptions{
-		Level: loggingLevel,
+func GetLogger() Logging {
+	if single_log == nil {
+		loggingLevel := new(slog.LevelVar)
+		opts := slog.HandlerOptions{
+			Level: loggingLevel,
+		}
+		textHandler := NewPrettyHandler(os.Stdout, &opts)
+		single_log = &logging{
+			slog.New(textHandler),
+			nil,
+			textHandler,
+			loggingLevel,
+			&opts,
+		}
 	}
-	textHandler := NewPrettyHandler(os.Stdout, &opts)
-	log := &Logging{
-		Log:     slog.New(textHandler),
-		Handler: textHandler,
-		Level:   loggingLevel,
-		Opt:     &opts,
-	}
-	return log
-}
-
-func (l *Logging) DebugLevel(debugLevel string) {
-	switch debugLevel {
-	case "":
-		l.Level.Set(slog.LevelError)
-	case "Error":
-		l.Level.Set(slog.LevelError)
-	case "Warn":
-		l.Level.Set(slog.LevelWarn)
-	case "Info":
-		l.Level.Set(slog.LevelInfo)
-	case "Debug":
-		l.Level.Set(slog.LevelDebug)
-	}
+	return single_log
 }

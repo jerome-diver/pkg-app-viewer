@@ -5,29 +5,28 @@ import "regexp"
 type CommandRun int8
 
 const (
-	nada CommandRun = iota
-	SearchSystem_pm
-	SearchIsolated_pm
-	SearchLanguage_pm
+	System_managers CommandRun = iota
+	Isolated_managers
+	Language_managers
 )
 
 func (c CommandRun) String() string {
 	switch c {
-	case SearchIsolated_pm:
-		return "SearchIsolatedPM"
-	case SearchSystem_pm:
-		return "SearchSystemPM"
-	case SearchLanguage_pm:
-		return "SearchLanguagePM"
+	case Isolated_managers:
+		return "Isolated Managers"
+	case System_managers:
+		return "System Managers"
+	case Language_managers:
+		return "Language Managers"
 	}
 	return "unknown"
 }
 
-type Package int8
+type Manager int8
 
 const (
-	None Package = iota
-	Apt
+	None Manager = iota
+	Dpkg
 	RPM
 	Pacman
 	Zypper
@@ -36,61 +35,70 @@ const (
 	Flatpak
 	Snap
 	Go
-	Rust
+	Cargo
+	Rustup
 	Rubygem
 	Pip
 	Source
 )
 
-func (p Package) String() string {
+func (p Manager) String() string {
 	switch p {
-	case Apt:
-		return "Apt"
+	case Dpkg:
+		return "Debian like dpkg"
+	case RPM:
+		return "RedHat like rpm"
+	case Pacman:
+		return "Archlinux like pacman"
 	case Flatpak:
-		return "Flatpak"
+		return "Flatpak manager"
 	case Snap:
-		return "Snap"
-	case Rust:
-		return "Rust"
+		return "Snap manager"
+	case Cargo:
+		return "Haskell cargo"
+	case Rustup:
+		return "Rust rustup"
 	case Rubygem:
-		return "Rubygem"
+		return "Ruby rubygem"
 	case Go:
-		return "Go"
+		return "Golang go"
 	case Pip:
-		return "Pip"
+		return "Python pip"
 	case Source:
-		return "Source"
+		return "Source file"
 	}
 	return "unknown"
 }
 
-type Search int8
+type SystemOption int8
 
 const (
-	All Search = iota
-	Added
-	OfficialRepos
-	OtherRepos
+	All SystemOption = iota
+	User
+	System
+	Distribution
+	Foreign
 	FileSource
 )
 
-func (s Search) String() string {
+func (s SystemOption) String() string {
 	switch s {
 	case All:
 		return "All"
-	case Added:
-		return "Added"
-	case OfficialRepos:
-		return "OfficialRepos"
-	case OtherRepos:
-		return "OtherRepos"
+	case User:
+		return "User Installed"
+	case System:
+		return "Official Repos"
+	case Foreign:
+		return "Foreign Repos"
 	case FileSource:
-		return "FileSource"
+		return "File Source"
+	case Distribution:
 	}
 	return "unknown"
 }
 
-func (s Search) Algorythm() func(string) bool {
+func (s SystemOption) Algorythm() func(string) bool {
 	switch s {
 	case FileSource:
 		return func(p string) bool {
@@ -102,21 +110,7 @@ func (s Search) Algorythm() func(string) bool {
 	}
 }
 
-type List struct {
-	All        []string
-	Added      []string
-	Official   []string
-	Other      []string
-	FileSource []string
-}
-
-type Installed struct {
-	Apt     List
-	Flatpak []string
-	Snap    []string
-	Rust    []string
-	Rubygem []string
-	Pip     []string
-	Go      []string
-	Source  []string
+type SystemRepo struct { // Will contain the origin and packages list (uniq)
+	Origin   string
+	Packages []string
 }

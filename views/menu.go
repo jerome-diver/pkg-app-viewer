@@ -22,7 +22,7 @@ type Menu struct {
 	Source        *cobra.Command
 }
 
-func NewMenu(config *model.ConfigFile) *Menu {
+func NewMenu(config model.ConfigFile) *Menu {
 	vm := new(Menu)
 	cobra.EnableCommandSorting = false
 	vm.Root = &cobra.Command{
@@ -36,7 +36,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 		Long:  "Search in the system any package managers to update config file and menu",
 		Args:  cobra.NoArgs,
 	}
-	switch config.System.Distribution_ID {
+	switch config.System.OS_Origin {
 	case "ubuntu":
 		vm.Apt = &cobra.Command{
 			Use:       "Apt [All, Added, OfficialAdded, FileSource, OtherRepos]",
@@ -78,7 +78,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 			Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		}
 	}
-	if config.Packager.Flatpak != "" {
+	if config.Isolated.Flatpak != "" {
 		vm.Flatpak = &cobra.Command{
 			Use:   "Flatpak",
 			Short: "Select Flatpak package type",
@@ -86,7 +86,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Packager.Snap != "" {
+	if config.Isolated.Snap != "" {
 		vm.Snap = &cobra.Command{
 			Use:   "Snap",
 			Short: "Select Snap package type",
@@ -94,8 +94,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Packager.Rust.Cabal != "" ||
-		config.Packager.Rust.Rustup != "" {
+	if config.Language.Rustup != "" {
 		vm.Rust = &cobra.Command{
 			Use:   "Rust",
 			Short: "Select Rust package type",
@@ -103,7 +102,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Packager.Rubygem != "" {
+	if config.Language.Rubygem != "" {
 		vm.Rubygem = &cobra.Command{
 			Use:   "Rubygem",
 			Short: "Select Rubygem manager package type",
@@ -111,7 +110,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Packager.Go != "" {
+	if config.Language.Go != "" {
 		vm.Go = &cobra.Command{
 			Use:   "Go",
 			Short: "Select Go package type",
@@ -119,7 +118,7 @@ func NewMenu(config *model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Packager.Python.Pip != "" {
+	if config.Language.Python.Pip != "" {
 		vm.Pip = &cobra.Command{
 			Use:   "Pip",
 			Short: "Select Pip manager package type",

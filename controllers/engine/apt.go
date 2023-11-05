@@ -1,4 +1,4 @@
-package controller
+package engine
 
 import (
 	"bufio"
@@ -8,21 +8,18 @@ import (
 	"slices"
 
 	model "github.com/pkg-app-viewer/models"
-	view "github.com/pkg-app-viewer/views"
 )
 
-type Find struct {
-	logger   *view.Logging
+type AptHistory struct {
 	Packages []string
 }
 
-func Finder(logger *view.Logging) *Find {
-	f := new(Find)
-	f.logger = logger
+func NewAptHistory() *AptHistory {
+	f := new(AptHistory)
 	return f
 }
 
-func (f *Find) cleanBytes(ipl []byte) []byte {
+func (f *AptHistory) cleanBytes(ipl []byte) []byte {
 	_, after, found := bytes.Cut(ipl, []byte("-y "))
 	var first_pass []byte
 	if found {
@@ -34,11 +31,11 @@ func (f *Find) cleanBytes(ipl []byte) []byte {
 	second_pass := re_parser.ReplaceAllString(string(first_pass), "")
 	re_parser = regexp.MustCompile(`(\-(\-\w+)+)+\s`)
 	clean := re_parser.ReplaceAllString(string(second_pass), "")
-	f.logger.Log.Debug("cleaned ipl", slog.String("ipl", clean))
+	logging.Debug("cleaned ipl", slog.String("ipl", clean))
 	return []byte(clean)
 }
 
-func (f *Find) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
+func (f *AptHistory) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
 	// remove unexpected content words
 	ipl_clean := f.cleanBytes(ipl)
 	// and split words
@@ -48,7 +45,7 @@ func (f *Find) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
 		clean_w := bytes.Trim(w, " ")
 		sclean_w := string(clean_w)
 		if slices.Contains(f.Packages, sclean_w) {
-			f.logger.Log.Debug("already listed in packages []string", slog.String("name", sclean_w))
+			logging.Debug("already listed in packages []string", slog.String("name", sclean_w))
 			continue
 		}
 		if len(clean_w) == 0 {
@@ -56,12 +53,12 @@ func (f *Find) installOccurenceFound(ipl []byte, algorythm func(string) bool) {
 		}
 		if algorythm(sclean_w) {
 			f.Packages = append(f.Packages, sclean_w)
-			f.logger.Log.Debug("added to packages []string", slog.String("name", sclean_w))
+			logging.Debug("added to packages []string", slog.String("name", sclean_w))
 		}
 	}
 }
 
-func (f *Find) removedOccurenceFound(ipl []byte) {
+func (f *AptHistory) removedOccurenceFound(ipl []byte) {
 	//remove unexpected content words
 	ipl_clean := f.cleanBytes(ipl)
 	//and split words
@@ -74,7 +71,7 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 		}
 		find_index := slices.Index(f.Packages, string(clean_w))
 		if find_index != -1 {
-			f.logger.Log.Debug("found occurence to delete in packages []string", slog.String("name", string(clean_w)))
+			logging.Debug("found occurence to delete in packages []string", slog.String("name", string(clean_w)))
 			last := find_index + 1
 			f.Packages = slices.Delete(f.Packages, find_index, last)
 		}
@@ -110,10 +107,10 @@ func (f *Find) removedOccurenceFound(ipl []byte) {
 
 *
 */
-func (f *Find) DebianPackagesToSearchFor(rawHistory []byte, mode model.Search) {
-	f.logger.Log.Debug("Start (*Find).AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
+func (f *AptHistory) DebianPackagesToSearchFor(rawHistory []byte, mode model.SystemOption) {
+	logging.Debug("Start (*AptHistory).AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
 	scanner := bufio.NewScanner(bytes.NewReader(rawHistory))
-	const maxCapacity = 512 * 1024
+	const maxCapacity = 256 * 1024
 	buf := make([]byte, maxCapacity)
 	scanner.Buffer(buf, maxCapacity)
 	scanner.Split(bufio.ScanLines)
@@ -130,11 +127,11 @@ func (f *Find) DebianPackagesToSearchFor(rawHistory []byte, mode model.Search) {
 scanner:
 	for scanner.Scan() {
 		b := scanner.Bytes()
-		if mode == model.Added { // find User managed package
+		if mode == model.User { // find User managed package
 			if _, user, found := bytes.Cut(b, []byte("Requested-By: ")); found {
-				f.logger.Log.Debug("find apt 'Requested-by: ' occurence (user management)",
+				logging.Debug("find apt 'Requested-by: ' occurence (user management)",
 					slog.String("user", string(user)),
-					slog.String("to Add (previous var after)", string(after)))
+					slog.String("to Add (previous variable)", string(after)))
 				if to_install {
 					f.installOccurenceFound(after, mode.Algorythm())
 				}
@@ -149,7 +146,7 @@ scanner:
 			to_install = false
 			if _, after, found = bytes.Cut(b, []byte(install)); found {
 				to_install = true
-				f.logger.Log.Debug("find apt-get install occurence",
+				logging.Debug("find apt-get install occurence",
 					slog.String("CutAfter", string(after)))
 				if mode == model.All || mode == model.FileSource {
 					f.installOccurenceFound(after, mode.Algorythm())
@@ -162,13 +159,13 @@ scanner:
 			to_remove = false
 			if _, after, found = bytes.Cut(b, []byte(remove)); found {
 				to_remove = true
-				f.logger.Log.Debug("find apt remove occurence",
+				logging.Debug("find apt remove occurence",
 					slog.String("CutAfter", string(after)))
 				f.removedOccurenceFound(after)
 				continue scanner // next scan if treated
 			}
 		}
 	}
-	f.logger.Error = scanner.Err()
-	f.logger.CheckError("Scanner error at history time")
+	logging.SetError(scanner.Err())
+	logging.CheckError("Scanner error at history time")
 }

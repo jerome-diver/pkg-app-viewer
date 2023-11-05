@@ -8,8 +8,8 @@ type Output struct {
 
 type Menu struct {
 	Command       CommandRun
-	PackageType   Package
-	PackageSearch Search
+	PackageType   Manager
+	PackageOption SystemOption
 	FileName      string
 	DirName       string
 	Mode          string

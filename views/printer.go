@@ -10,20 +10,21 @@ import (
 	model "github.com/pkg-app-viewer/models"
 )
 
+var logger Logging
+
 type Printer struct {
-	logger    *Logging
 	Output    model.Output
-	Packager  model.Package
-	SearchFor model.Search
+	Packager  model.Manager
+	SearchFor model.SystemOption
 	Data      []string
 }
 
-func NewPrinter(logger *Logging, model *model.Menu) *Printer {
+func NewPrinter(model *model.Menu) *Printer {
+	logger = GetLogger()
 	p := &Printer{
-		logger:    logger,
 		Output:    model.Output,
 		Packager:  model.PackageType,
-		SearchFor: model.PackageSearch}
+		SearchFor: model.PackageOption}
 	return p
 }
 
@@ -53,14 +54,14 @@ func (p *Printer) Write(data []string) {
 					Items: []string{"Overwrite", "Append", "Cancel"},
 				}
 				_, result, err := prompt.Run()
-				p.logger.Error = err
-				p.logger.CheckError("Prompt return bad statement")
+				logger.SetError(err)
+				logger.CheckError("Prompt return bad statement")
 				var options int
 				switch result {
 				case "Overwrite":
 					{
-						p.logger.Error = os.Truncate(p.Output.File, 0)
-						p.logger.CheckError("Truncate Output.File gone bad")
+						logger.SetError(os.Truncate(p.Output.File, 0))
+						logger.CheckError("Truncate Output.File gone bad")
 						options = os.O_RDWR | os.O_CREATE
 					}
 				case "Append":
@@ -69,17 +70,19 @@ func (p *Printer) Write(data []string) {
 					os.Exit(0)
 				}
 				f, err := os.OpenFile(p.Output.File, options, 0644)
-				p.logger.Error = err
-				p.logger.CheckError("Can not open Output.File")
+				logger.SetError(err)
+				logger.CheckError("Can not open Output.File")
+				defer f.Close()
 				p.writeInFile(f)
 			} else if os.IsNotExist(err) {
 				f, err := os.Create(p.Output.File)
-				p.logger.Error = err
-				p.logger.CheckError("OutFile doesn't existe and i can not create Output.File")
+				logger.SetError(err)
+				logger.CheckError("OutFile doesn't existe and i can not create Output.File")
+				defer f.Close()
 				p.writeInFile(f)
 			} else {
-				p.logger.Error = err
-				p.logger.CheckError("Output.File error")
+				logger.SetError(err)
+				logger.CheckError("Output.File error")
 			}
 		}
 	}
@@ -89,12 +92,12 @@ func (p *Printer) writeInFile(f *os.File) {
 	var s_byte int
 	for _, str := range p.Data {
 		n, err := f.WriteString(str + "\n")
-		p.logger.Error = err
-		p.logger.CheckError("Can  t write in file")
+		logger.SetError(err)
+		logger.CheckError("Can  t write in file")
 		s_byte += n
 	}
 	defer f.Close()
-	p.logger.Log.Debug("writed in file",
+	logger.Debug("writed in file",
 		slog.String("file", p.Output.File),
 		slog.Int("size(byte)", s_byte))
 }

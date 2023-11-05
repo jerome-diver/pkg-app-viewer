@@ -8,27 +8,25 @@ import (
 	view "github.com/pkg-app-viewer/views"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 type Menu struct {
-	Config *model.ConfigFile
 	Model  *model.Menu
 	View   *view.Menu
-	logger *view.Logging
+	Config model.ConfigFile
 }
 
-func NewMenu(logger *view.Logging, version string, config *viper.Viper) *Menu {
+func NewMenu(version string) *Menu {
+	config = model.GetConfig()
 	menu := new(Menu)
-	menu.logger = logger
-	menu.Config = new(model.ConfigFile)
-	menu.logger.Error = config.Unmarshal(menu.Config)
-	menu.logger.CheckError("can not unmarshall config file")
-	menu.logger.Log.Debug("Start Menu building process")
+	menu.Config = model.ConfigFile{}
+	logging = view.GetLogger()
+	logging.CheckError("can not unmarshall config file")
+	logging.Debug("Start Menu building process")
 	menu.View = view.NewMenu(menu.Config)
 	menu.Model = model.NewMenu()
 	menu.View.SearchManager.Run = menu.execSearchPackageManager
-	menu.initMenuCommand()
+	//	menu.initMenuCommand()
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.Interactive, "interactive", "i", false, "Interactive terminal mode")
@@ -41,8 +39,15 @@ func NewMenu(logger *view.Logging, version string, config *viper.Viper) *Menu {
 	menu.View.Root.Execute()
 	return menu
 }
-func (m *Menu) initMenuCommand() {
-	switch m.Config.System.Distribution_ID {
+func (m *Menu) InitMenuCommand() {
+	switch m.Config.System.OS_Origin {
+	case "debian":
+		{
+			m.View.Apt.Run = m.execApt
+			m.View.Apt.Flags().StringVarP(&m.Model.DirName, "fromDir", "D", "", "indicate directory to search for apt history log files")
+			m.View.Apt.Flags().StringVarP(&m.Model.FileName, "fromFile", "F", "", "indicate files to search for apt history log files")
+			m.View.Root.AddCommand(m.View.Apt)
+		}
 	case "ubuntu":
 		{
 			m.View.Apt.Run = m.execApt
@@ -71,28 +76,27 @@ func (m *Menu) initMenuCommand() {
 			m.View.Root.AddCommand((m.View.Nix))
 		}
 	}
-	if m.Config.Packager.Flatpak != "" {
+	if m.Config.Isolated.Flatpak != "" {
 		m.View.Flatpak.Run = m.execFlatpak
 		m.View.Root.AddCommand(m.View.Flatpak)
 	}
-	if m.Config.Packager.Snap != "" {
+	if m.Config.Isolated.Snap != "" {
 		m.View.Snap.Run = m.execSnap
 		m.View.Root.AddCommand(m.View.Snap)
 	}
-	if m.Config.Packager.Go != "" {
+	if m.Config.Language.Go != "" {
 		m.View.Go.Run = m.execGo
 		m.View.Root.AddCommand(m.View.Go)
 	}
-	if m.Config.Packager.Python.Pip != "" {
+	if m.Config.Language.Python.Pip != "" {
 		m.View.Pip.Run = m.execPip
 		m.View.Root.AddCommand((m.View.Pip))
 	}
-	if m.Config.Packager.Rubygem != "" {
+	if m.Config.Language.Rubygem != "" {
 		m.View.Rubygem.Run = m.execRubygem
 		m.View.Root.AddCommand(m.View.Rubygem)
 	}
-	if m.Config.Packager.Rust.Cabal != "" ||
-		m.Config.Packager.Rust.Rustup != "" {
+	if m.Config.Language.Rustup != "" {
 		m.View.Rust.Run = m.execRust
 		m.View.Root.AddCommand(m.View.Rust)
 	}
@@ -140,79 +144,79 @@ func (m *Menu) validateGeneralFlags(cmd *cobra.Command, arg []string) error {
 }
 
 func (m *Menu) execSearchPackageManager(cmd *cobra.Command, arg []string) {
-	m.Model.Command = model.SearchSystem_pm
+	m.Model.Command = model.System_managers
 }
 
 func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Apt
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Dpkg
 	switch arg[0] {
 	case "All":
-		m.Model.PackageSearch = model.All
+		m.Model.PackageOption = model.All
 	case "Added":
-		m.Model.PackageSearch = model.Added
+		m.Model.PackageOption = model.User
 	case "OfficialAdded":
-		m.Model.PackageSearch = model.OfficialRepos
+		m.Model.PackageOption = model.System
 	case "OtherRepos":
-		m.Model.PackageSearch = model.OtherRepos
+		m.Model.PackageOption = model.Foreign
 	case "FileSource":
-		m.Model.PackageSearch = model.FileSource
+		m.Model.PackageOption = model.FileSource
 	default:
-		m.Model.PackageSearch = model.All
+		m.Model.PackageOption = model.All
 	}
 }
 
 func (m *Menu) execFlatpak(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Flatpak
 }
 
 func (m *Menu) execRPM(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.RPM
 }
 
 func (m *Menu) execPacman(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Snap
 }
 
 func (m *Menu) execZypper(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Snap
 }
 
 func (m *Menu) execNix(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Snap
 }
 
 func (m *Menu) execSnap(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Snap
 }
 
 func (m *Menu) execRubygem(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Rubygem
 }
 
 func (m *Menu) execPip(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Pip
 }
 
 func (m *Menu) execRust(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Rust
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	m.Model.PackageType = model.Rustup
 }
 
 func (m *Menu) execGo(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Go
 }
 
 func (m *Menu) execSource(cmd *cobra.Command, arg []string) {
-	m.logger.Log.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
+	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Source
 }
