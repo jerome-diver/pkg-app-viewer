@@ -14,81 +14,19 @@ import (
 	"os"
 
 	model "github.com/pkg-app-viewer/models"
-	view "github.com/pkg-app-viewer/views"
-	"golang.org/x/exp/slices"
+	report "github.com/pkg-app-viewer/views/report"
 )
 
 var config model.Config
-var logging view.Logging
-
-// Main struct to use to get infos
-// of package managers
-type Identifier struct {
-	//Config *model.ConfigFile
-	Infos struct {
-		System   ManagersInfos[model.Manager]
-		Isolated ManagersInfos[[]model.Manager]
-		Language ManagersInfos[[]model.Manager]
-	}
-}
-
-// can have different answer type
-type format interface {
-	model.Manager | []model.Manager
-}
-
-// generic interface to use
-// answer infos format to embed
-type ManagersInfos[T format] interface {
-	GetTypes() T
-	AsType(model.Manager) bool
-	GetStruct() ManagersInfos[T]
-}
-
-type System struct { // System can have only one type
-	Type model.Manager
-	Name string
-	Arch string
-}
-
-func (manager System) GetTypes() model.Manager {
-	return manager.Type
-}
-
-func (manager System) GetStruct() ManagersInfos[model.Manager] {
-	return manager
-}
-
-// slices format of model.Manager (Isolated & Language)
-type NoSystem struct { // can have any package managers type
-	Types []model.Manager
-	User  string
-}
-
-// model.Manager only format
-func (manager System) AsType(t model.Manager) bool {
-	return manager.Type == t
-}
-
-func (manager NoSystem) AsType(t model.Manager) bool {
-	return slices.Contains(manager.Types, t)
-}
-
-func (manager NoSystem) GetTypes() []model.Manager {
-	return manager.Types
-}
-
-func (manager NoSystem) GetStruct() ManagersInfos[[]model.Manager] {
-	return manager
-}
+var logging report.Logging
 
 // Build new iddentifier instance
-func New(config model.ConfigFile) *Identifier {
-	id := new(Identifier)
-	logging = view.GetLogger()
-	id.Infos.System = id.GetSystemInfos()
-	id.Infos.Isolated = id.GetIsolatedInfos()
-	id.Infos.Language = id.GetLanguageInfos()
+func New() *model.Identity {
+	logging = report.GetLogger()
+	id := new(model.Identity)
+	id.System = getSystemInfos()
+	id.Isolated = getIsolatedInfos()
+	id.Language = getLanguageInfos()
 	return id
 }
 
@@ -120,8 +58,8 @@ func getSystemManagerType(data []byte) model.Manager {
 	return model.None
 }
 
-func (id *Identifier) GetSystemInfos() System {
-	var sys_info System = System{}
+func getSystemInfos() model.SystemId {
+	var sys_info model.SystemId = model.SystemId{}
 	logging.Debug("Start Searching for system package manager depend on system OS")
 	const (
 		system_tag_name = "NAME="
@@ -173,8 +111,8 @@ func (id *Identifier) GetSystemInfos() System {
 	return sys_info
 }
 
-func (id *Identifier) GetIsolatedInfos() NoSystem {
-	var isolated_infos NoSystem = NoSystem{}
+func getIsolatedInfos() model.NoSystemId {
+	var isolated_infos model.NoSystemId = model.NoSystemId{}
 	var home string
 	home, err := os.UserHomeDir()
 	logging.SetError(err)
@@ -196,8 +134,8 @@ func (id *Identifier) GetIsolatedInfos() NoSystem {
 	return isolated_infos
 }
 
-func (id *Identifier) GetLanguageInfos() NoSystem {
-	var languages_infos NoSystem = NoSystem{}
+func getLanguageInfos() model.NoSystemId {
+	var languages_infos model.NoSystemId = model.NoSystemId{}
 	//const (
 	// Go has his own tool set to manage packages,
 	// But it does exist also Cask.

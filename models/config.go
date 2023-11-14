@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 type ConfigFile struct {
@@ -35,53 +36,85 @@ type ConfigFile struct {
 }
 
 type Config interface {
-	SetConfigFile(string)
 	GetConfigFile() string
+	ReadConfigFile() error
+	WriteConfigFile() error
 	GetData() ConfigFile
 	SetData(ConfigFile)
-	SaveConfig() error
 }
 
 type config struct {
 	*viper.Viper
-	File string
-	Data ConfigFile
+	path   string
+	name   string
+	suffix string
+	data   ConfigFile
 }
 
 var single_config *config
 
-func (c config) SetConfigFile(fullFileName string) {}
-
 func (c config) GetConfigFile() string {
-	return c.File
+	return c.path + c.name + c.suffix
 }
 
 func (c config) GetData() ConfigFile {
-	return c.Data
+	return c.data
 }
 
 func (c config) SetData(cf ConfigFile) {
-	c.Data = cf
+	c.data = cf
 }
 
-func (c config) SaveConfig() error {
-	return c.Unmarshal(c.Data)
+func (c config) ReadConfigFile() error {
+	return c.Unmarshal(c.data)
+}
+
+func (c config) WriteConfigFile() error {
+	setting := c.AllSettings()
+	bs, err := yaml.Marshal(setting)
+	if err != nil {
+		return err
+	}
+	options := os.O_RDWR | os.O_CREATE
+	f, err := os.OpenFile(c.GetConfigFile(), options, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	// write bs in config file
+	for _, str := range bs {
+		_, err = f.WriteString(string(str) + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func GetConfig() Config {
 	if single_config == nil {
-		var err error
-		var home_dir string
+		home_dir, err := os.UserHomeDir()
+		if err != nil {
+			panic("Can not read home directory")
+		}
+		path := home_dir + "/.config/pkg-app-viewer"
+		name := "config"
+		suffix := "yaml"
 		single_config = &config{
 			viper.New(),
-			"",
+			path,
+			name,
+			suffix,
 			ConfigFile{},
 		}
-		home_dir, _ = os.UserHomeDir()
-		single_config.SetConfigName("config")
-		single_config.SetConfigType("yaml")
-		single_config.AddConfigPath(home_dir + "/.config/pkg-app-viewer")
+		single_config.SetConfigName(name)
+		single_config.SetConfigType(suffix)
+		single_config.AddConfigPath(path)
 		err = single_config.ReadInConfig()
+		if err != nil {
+			panic("can not read config file")
+		}
+		err = single_config.Unmarshal(single_config.data)
 		if err != nil {
 			panic("can not unmarshall config file")
 		}

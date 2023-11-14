@@ -11,11 +11,10 @@ import (
 	"slices"
 
 	model "github.com/pkg-app-viewer/models"
-	view "github.com/pkg-app-viewer/views"
+	report "github.com/pkg-app-viewer/views/report"
 )
 
-var config model.Config
-var logging view.Logging
+var logging report.Logging
 
 type Box struct {
 }
@@ -28,7 +27,7 @@ type Gz struct {
 }
 
 func New() *Box {
-	logging = view.GetLogger()
+	logging = report.GetLogger()
 	t := new(Box)
 	return t
 }
@@ -66,40 +65,35 @@ func (t *Box) printMeta(g *Gz) {
 		))
 }
 
-func (t *Box) GetFileContent(model_menu *model.Menu) []byte {
+func (t *Box) GetFileContent(fileName string) []byte {
 	var err error
 	// return readable file content bytes (from clear fille or gz file)
-	suffix := filepath.Ext(model_menu.FileName)
+	suffix := filepath.Ext(fileName)
 	if suffix == ".gz" {
-		gz := t.readGzip(model_menu.FileName)
-		if model_menu.ShowMeta {
-			t.printMeta(gz)
-		} else {
-			logging.Info("Treated file apt history gz log", slog.String("File", model_menu.FileName))
-		}
+		gz := t.readGzip(fileName)
 		return gz.ClearBytes
 	} else {
 		var clearBytes []byte
-		clearBytes, err = os.ReadFile(model_menu.FileName)
+		clearBytes, err = os.ReadFile(fileName)
 		logging.SetError(err)
 		logging.CheckError("Can not read file.")
-		logging.Info("Treated file apt history log", slog.String("File", model_menu.FileName))
+		logging.Info("Treated file apt history log", slog.String("File", fileName))
 		return clearBytes
 	}
 }
 
-func (t *Box) GetAptHistoryFilesList(model_menu *model.Menu) []string {
+func (t *Box) GetAptHistoryFilesList(dirName string) []string {
 	// concatene and return files content bytes
 	var aptHistoryFiles []string
-	logging.Info("Treated file apt history log directory", slog.String("Dir", model_menu.DirName))
-	err := filepath.Walk(model_menu.DirName, func(path string, info fs.FileInfo, err error) error {
+	logging.Info("Treated file apt history log directory", slog.String("Dir", dirName))
+	err := filepath.Walk(dirName, func(path string, info fs.FileInfo, err error) error {
 		if !info.IsDir() {
 			var matched bool
 			matched, err = regexp.Match(`history\.log.*`, []byte(info.Name()))
 			logging.SetError(err)
 			logging.CheckError("Can not match history log froom bytes slice")
 			if matched {
-				fullFileName := model_menu.DirName + "/" + info.Name()
+				fullFileName := dirName + "/" + info.Name()
 				aptHistoryFiles = slices.Insert(aptHistoryFiles, 0, fullFileName)
 			}
 		}
@@ -108,4 +102,8 @@ func (t *Box) GetAptHistoryFilesList(model_menu *model.Menu) []string {
 	logging.SetError(err)
 	logging.CheckError("Can not go through directory to get history files")
 	return aptHistoryFiles
+}
+
+func UpdateConfig(config *model.Config, identity *model.Identity) {
+
 }

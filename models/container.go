@@ -1,27 +1,17 @@
 package model
 
-import "regexp"
-
-type CommandRun int8
-
-const (
-	System_managers CommandRun = iota
-	Isolated_managers
-	Language_managers
+import (
+	"regexp"
+	"slices"
 )
 
-func (c CommandRun) String() string {
-	switch c {
-	case Isolated_managers:
-		return "Isolated Managers"
-	case System_managers:
-		return "System Managers"
-	case Language_managers:
-		return "Language Managers"
-	}
-	return "unknown"
-}
+/*
+Identify package manager family type
 
+the list of const is the full
+list of manager that can be
+care about
+*/
 type Manager int8
 
 const (
@@ -39,7 +29,6 @@ const (
 	Rustup
 	Rubygem
 	Pip
-	Source
 )
 
 func (p Manager) String() string {
@@ -64,12 +53,17 @@ func (p Manager) String() string {
 		return "Golang go"
 	case Pip:
 		return "Python pip"
-	case Source:
-		return "Source file"
 	}
 	return "unknown"
 }
 
+/*
+Identify packages mode request filter
+
+	can send back a
+	- string
+	- specific algorithm
+*/
 type SystemOption int8
 
 const (
@@ -110,7 +104,93 @@ func (s SystemOption) Algorythm() func(string) bool {
 	}
 }
 
-type SystemRepo struct { // Will contain the origin and packages list (uniq)
+/*
+Contain Repo packages datas as
+
+	Origin name
+	Packages as list (slices) of packages
+*/
+type Repository struct { // Will contain the origin and packages list (uniq)
 	Origin   string
 	Packages []string
+}
+
+/*
+	 Main Identity struct handle managers infos
+
+	   Hold 33 different type:
+		- System is for system uniq package manager info
+		- Isolated is for any independant container package managers
+		- Language is for specific language's package managers information
+*/
+type Identity struct {
+	System   ManagersInfos[Manager]
+	Isolated ManagersInfos[[]Manager]
+	Language ManagersInfos[[]Manager]
+}
+
+/*
+generic interface to handle identity Manager
+
+	answer is one or any infos format interface to embed
+*/
+type ManagersInfos[T format] interface {
+	GetTypes() T
+	AsType(Manager) bool
+	GetStruct() ManagersInfos[T]
+}
+
+type format interface {
+	Manager | []Manager
+}
+
+/*
+System Identity struct
+
+	will handle ManagersInfos interface
+	to hold Sytem package managers informations
+	And will have only one type of Manager
+*/
+type SystemId struct {
+	Type Manager
+	Name string
+	Arch string
+}
+
+// Handle ManagersInfos[T] interface
+func (manager SystemId) AsType(t Manager) bool {
+	return manager.Type == t
+}
+
+func (manager SystemId) GetTypes() Manager {
+	return manager.Type
+}
+
+func (manager SystemId) GetStruct() ManagersInfos[Manager] {
+	return manager
+}
+
+/*
+Other packages managers Identity struct
+
+	will handle ManagersInfos interface
+	to hold managers informations
+	And will have many possible type of Manager
+*/
+type NoSystemId struct {
+	Types []Manager
+	User  string
+}
+
+// Handle ManagersInfos[T] interface
+func (manager NoSystemId) AsType(t Manager) bool {
+	return slices.Contains(manager.Types, t)
+}
+
+func (manager NoSystemId) GetTypes() []Manager {
+	return manager.Types
+}
+
+func (manager NoSystemId) GetStruct() ManagersInfos[[]Manager] {
+	return manager
 }

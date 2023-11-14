@@ -8,9 +8,10 @@ import (
 
 	"github.com/manifoldco/promptui"
 	model "github.com/pkg-app-viewer/models"
+	report "github.com/pkg-app-viewer/views/report"
 )
 
-var logger Logging
+var logger report.Logging
 
 type Printer struct {
 	Output    model.Output
@@ -20,7 +21,7 @@ type Printer struct {
 }
 
 func NewPrinter(model *model.Menu) *Printer {
-	logger = GetLogger()
+	logger = report.GetLogger()
 	p := &Printer{
 		Output:    model.Output,
 		Packager:  model.PackageType,
@@ -96,7 +97,6 @@ func (p *Printer) writeInFile(f *os.File) {
 		logger.CheckError("Can  t write in file")
 		s_byte += n
 	}
-	defer f.Close()
 	logger.Debug("writed in file",
 		slog.String("file", p.Output.File),
 		slog.Int("size(byte)", s_byte))

@@ -169,7 +169,7 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 		rawHistory, _ := os.ReadFile(test.fileName)
 		Convey(test.title, t, func() {
 			f.Packages = []string{}
-			f.DebianPackagesToSearchFor(rawHistory, test.search)
+			f.AptPackagesToSearchFor(rawHistory, test.search)
 			So(f.Packages, ShouldEqual, test.want)
 		})
 	}

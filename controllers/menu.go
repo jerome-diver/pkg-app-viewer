@@ -6,6 +6,7 @@ import (
 
 	model "github.com/pkg-app-viewer/models"
 	view "github.com/pkg-app-viewer/views"
+	report "github.com/pkg-app-viewer/views/report"
 
 	"github.com/spf13/cobra"
 )
@@ -16,17 +17,19 @@ type Menu struct {
 	Config model.ConfigFile
 }
 
-func NewMenu(version string) *Menu {
-	config = model.GetConfig()
+func NewMenu() *Menu {
 	menu := new(Menu)
-	menu.Config = model.ConfigFile{}
-	logging = view.GetLogger()
+	logging = report.GetLogger()
 	logging.CheckError("can not unmarshall config file")
 	logging.Debug("Start Menu building process")
-	menu.View = view.NewMenu(menu.Config)
 	menu.Model = model.NewMenu()
+	return menu
+}
+
+func (menu *Menu) InitView(version string, id *model.Identity) {
+	menu.View = view.NewMenu(id)
 	menu.View.SearchManager.Run = menu.execSearchPackageManager
-	//	menu.initMenuCommand()
+	menu.InitMenuCommand()
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.Interactive, "interactive", "i", false, "Interactive terminal mode")
@@ -37,8 +40,8 @@ func NewMenu(version string) *Menu {
 	menu.View.Root.Version = version
 	menu.View.Root.AddCommand(menu.View.SearchManager)
 	menu.View.Root.Execute()
-	return menu
 }
+
 func (m *Menu) InitMenuCommand() {
 	switch m.Config.System.OS_Origin {
 	case "debian":
@@ -99,10 +102,6 @@ func (m *Menu) InitMenuCommand() {
 	if m.Config.Language.Rustup != "" {
 		m.View.Rust.Run = m.execRust
 		m.View.Root.AddCommand(m.View.Rust)
-	}
-	if m.Config.Source != "" {
-		m.View.Source.Run = m.execSource
-		m.View.Root.AddCommand(m.View.Source)
 	}
 }
 
@@ -214,9 +213,4 @@ func (m *Menu) execRust(cmd *cobra.Command, arg []string) {
 func (m *Menu) execGo(cmd *cobra.Command, arg []string) {
 	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
 	m.Model.PackageType = model.Go
-}
-
-func (m *Menu) execSource(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Source
 }

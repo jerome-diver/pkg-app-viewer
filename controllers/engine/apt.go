@@ -107,7 +107,9 @@ func (f *AptHistory) removedOccurenceFound(ipl []byte) {
 
 *
 */
-func (f *AptHistory) DebianPackagesToSearchFor(rawHistory []byte, mode model.SystemOption) {
+
+func (f *AptHistory) AptPackagesToSearchFor(rawHistory []byte, mode model.SystemOption, args ...string) {
+	// args could be a name of User
 	logging.Debug("Start (*AptHistory).AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
 	scanner := bufio.NewScanner(bytes.NewReader(rawHistory))
 	const maxCapacity = 256 * 1024
@@ -128,7 +130,7 @@ scanner:
 	for scanner.Scan() {
 		b := scanner.Bytes()
 		if mode == model.User { // find User managed package
-			if _, user, found := bytes.Cut(b, []byte("Requested-By: ")); found {
+			if _, user, found := bytes.Cut(b, []byte("Requested-By: "+args[0])); found {
 				logging.Debug("find apt 'Requested-by: ' occurence (user management)",
 					slog.String("user", string(user)),
 					slog.String("to Add (previous variable)", string(after)))

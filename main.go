@@ -2,19 +2,20 @@ package main
 
 import (
 	controller "github.com/pkg-app-viewer/controllers"
-	view "github.com/pkg-app-viewer/views"
+	report "github.com/pkg-app-viewer/views/report"
 )
 
-const version = "0.0.2"
+const version = "0.2.1"
 
-var logger view.Logging
+var logger report.Logging
 var menu *controller.Menu
 var control *controller.Operator
 
 func init() {
-	menu = controller.NewMenu(version)
-	control = controller.NewOperator(menu)
-	control.BuildConfig()
+	menu = controller.NewMenu()
+	control = controller.NewOperator(menu.Model)
+	control.BuildConfig(menu)
+	menu.InitView(version, control.PackagesId)
 	control.BuildMenu(menu)
 }
 

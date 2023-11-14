@@ -3,29 +3,37 @@ package engine
 import (
 	"bufio"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
 	"strings"
 
+	tool "github.com/pkg-app-viewer/controllers/tools"
 	model "github.com/pkg-app-viewer/models"
 )
 
+/*
+DpkgRepos handle SystemRepos interface
+He has an InstalledSystemRepos as ReposHanlder
+*/
 type DpkgRepos struct {
-	SystemReposHandler
+	InstalledSystemRepos
 }
 
+// Handle ManagerHandler interface
 func (d DpkgRepos) ManagerModel() model.Manager {
 	return model.Dpkg
 }
 
+// Handle ReposFinder interface
 func (ir DpkgRepos) Find() map[string][]string {
-	// will find repo packages for each repoitory through repo files crawl
+	// will find repo packages for each repository through apt repo files crawl
 	// First here is the glob *Release files with Origin: flag (has repo name and key)
 	// send back repo data without cleaning uniq entries and no specific origin
 	repos := map[string][]string{}
-	rootDir := "/var/lib/apt/lists"
-	releaseFiles, err := filepath.Glob(filepath.Join(rootDir, "*Release"))
+	aptReposDir := "/var/lib/apt/lists"
+	releaseFiles, err := filepath.Glob(filepath.Join(aptReposDir, "*Release"))
 	if err != nil {
 		fmt.Println("Error to get Release's files:", err)
 		return nil
@@ -91,10 +99,10 @@ func (ir DpkgRepos) AddPackage(origin, packageName string, computeOrigin func(st
 	//fmt.Printf("\t\t\t\tTry to add package: %s at Origin: %s for lentgh Foreign: %d\n", packageName, origin, len(ir.Foreign))
 	if computeOrigin(origin) {
 		// Add the package in his place after to check unicity list
-		if !slices.ContainsFunc(ir.Installed, func(r model.SystemRepo) bool {
+		if !slices.ContainsFunc(ir.Installed, func(r model.Repository) bool {
 			return r.Origin == origin
 		}) {
-			ir.Installed = append(ir.Installed, model.SystemRepo{
+			ir.Installed = append(ir.Installed, model.Repository{
 				Origin:   origin,
 				Packages: []string{}})
 		}
@@ -112,11 +120,6 @@ func (ir DpkgRepos) AddPackage(origin, packageName string, computeOrigin func(st
 			}
 		}
 	}
-}
-
-func (ir DpkgRepos) UserInstalled(userName string) map[string][]string {
-	var packagesOwner map[string][]string
-	return packagesOwner
 }
 
 func (ir DpkgRepos) IsInstalled(packageName string) bool {
@@ -157,12 +160,38 @@ func (ir DpkgRepos) IsInstalled(packageName string) bool {
 	return false
 }
 
+func (ir DpkgRepos) UserInstalled(userName string, packageName string) bool {
+	// check if packageName has been installed by userName
+	if ir.userInstalled[userName] == nil {
+		ir.populateUserInstalledFor(userName)
+	}
+	pkg_list := ir.userInstalled[userName]
+	return slices.Contains(pkg_list, packageName)
+}
+
+func (ir DpkgRepos) populateUserInstalledFor(userName string) {
+	// Have to use Apt search for user mode
+	logging.Debug("RUN Dpkg.UserInstalled from engine",
+		slog.String("userName", userName))
+	aptHistory := NewAptHistory()
+	toolBox := tool.New()
+	aptDirName := "/var/log/apt"
+	filesList := toolBox.GetAptHistoryFilesList(aptDirName)
+	for _, file := range filesList {
+		clearBytes := toolBox.GetFileContent(file)
+		aptHistory.AptPackagesToSearchFor(clearBytes, model.User, userName)
+	}
+	ir.userInstalled[userName] = aptHistory.Packages
+}
+
 /* ----------------------------------------------------------------------------------------
-   PopOSRepos implment interface ReposFamilly
-   and is composed by Repos as InstalledRepos
+   PopOSRepos handles SystemReposAlgorithm
+   interface and is composed by
+   DpkgRepos as InstalledSystemRepos
 -----------------------------------------------------------------------------------------*/
 
 type PopOSRepos struct { // Origin is: pop-os*
+	DpkgRepos
 }
 
 func (repos PopOSRepos) OriginSelector(origin string) bool {
@@ -180,11 +209,13 @@ func (repos PopOSRepos) Option() model.SystemOption {
 }
 
 /* ----------------------------------------------------------------------------------------
-   DebianRepos implment interface ReposFamilly
-   and is composed by Repos as InstalledRepos
+   DebianRepos handles SystemReposAlgorithm
+   interface and is composed by
+   DpkgRepos as InstalledSystemRepos
 -----------------------------------------------------------------------------------------*/
 
 type DebianRepos struct { // Origin is: Debian
+	DpkgRepos
 }
 
 func (repos DebianRepos) OriginSelector(origin string) bool {
@@ -202,11 +233,13 @@ func (repos DebianRepos) Option() model.SystemOption {
 }
 
 /* ----------------------------------------------------------------------------------------
-   UbuntuRepos implment interface ReposFamilly
-   and is composed by Repos as InstalledRepos
+   UbuntuRepos handles SystemReposAlgorithm
+   interface and is composed by
+   DpkgRepos as InstalledSystemRepos
 -----------------------------------------------------------------------------------------*/
 
 type UbuntuRepos struct { // Origin is: Ubuntu
+	DpkgRepos
 }
 
 func (repos UbuntuRepos) OriginSelector(origin string) bool {
@@ -224,11 +257,13 @@ func (repos UbuntuRepos) Option() model.SystemOption {
 }
 
 /* ----------------------------------------------------------------------------------------
-   ForeignRepos implment interface ReposFamilly
-   and is composed by Repos as InstalledRepos
+   ForeignRepos handle SystemReposAlgorithm
+   interface and is composed by
+   DpkgRepos as InstalledSystemRepos
 -----------------------------------------------------------------------------------------*/
 
 type ForeignDebRepos struct { // Origin is not any: [ Ubuntu*, pop-os*, system*]
+	DpkgRepos
 }
 
 func (repos ForeignDebRepos) OriginSelector(origin string) bool {

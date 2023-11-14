@@ -2,7 +2,9 @@ package view
 
 import (
 	model "github.com/pkg-app-viewer/models"
+
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
 )
 
 type Menu struct {
@@ -22,7 +24,7 @@ type Menu struct {
 	Source        *cobra.Command
 }
 
-func NewMenu(config model.ConfigFile) *Menu {
+func NewMenu(id *model.Identity) *Menu {
 	vm := new(Menu)
 	cobra.EnableCommandSorting = false
 	vm.Root = &cobra.Command{
@@ -36,8 +38,8 @@ func NewMenu(config model.ConfigFile) *Menu {
 		Long:  "Search in the system any package managers to update config file and menu",
 		Args:  cobra.NoArgs,
 	}
-	switch config.System.OS_Origin {
-	case "ubuntu":
+	switch id.System.GetTypes() {
+	case model.Dpkg:
 		vm.Apt = &cobra.Command{
 			Use:       "Apt [All, Added, OfficialAdded, FileSource, OtherRepos]",
 			Short:     "Select Debian like package type",
@@ -45,7 +47,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			ValidArgs: []string{"All", "Added", "OfficialAdded", "OtherRepos", "FileSource"},
 			Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		}
-	case "redhat":
+	case model.RPM:
 		vm.RPM = &cobra.Command{
 			Use:       "RPM [All, Added, OfficialAdded, FileSource, OtherRepos]",
 			Short:     "Select Red Hat like package type",
@@ -53,7 +55,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			ValidArgs: []string{"All", "Added", "OfficialAdded", "OtherRepos", "FileSource"},
 			Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		}
-	case "arch":
+	case model.Pacman:
 		vm.Pacman = &cobra.Command{
 			Use:       "Pacman [All, Added, OfficialAdded, FileSource, OtherRepos]",
 			Short:     "Select Arch like package type",
@@ -61,7 +63,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			ValidArgs: []string{"All", "Added", "OfficialAdded", "OtherRepos", "FileSource"},
 			Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		}
-	case "gentoo":
+	case model.Zypper:
 		vm.Zypper = &cobra.Command{
 			Use:       "Zypper [All, Added, OfficialAdded, FileSource, OtherRepos]",
 			Short:     "Select Gentoo like package type",
@@ -69,7 +71,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			ValidArgs: []string{"All", "Added", "OfficialAdded", "OtherRepos", "FileSource"},
 			Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		}
-	case "nixos":
+	case model.Nix:
 		vm.Nix = &cobra.Command{
 			Use:       "Nix [All, Added, OfficialAdded, FileSource, OtherRepos]",
 			Short:     "Select NixOS like package type",
@@ -78,7 +80,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 		}
 	}
-	if config.Isolated.Flatpak != "" {
+	if slices.Contains(id.Isolated.GetTypes(), model.Flatpak) {
 		vm.Flatpak = &cobra.Command{
 			Use:   "Flatpak",
 			Short: "Select Flatpak package type",
@@ -86,7 +88,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Isolated.Snap != "" {
+	if slices.Contains(id.Isolated.GetTypes(), model.Snap) {
 		vm.Snap = &cobra.Command{
 			Use:   "Snap",
 			Short: "Select Snap package type",
@@ -94,7 +96,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Language.Rustup != "" {
+	if slices.Contains(id.Language.GetTypes(), model.Rustup) {
 		vm.Rust = &cobra.Command{
 			Use:   "Rust",
 			Short: "Select Rust package type",
@@ -102,7 +104,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Language.Rubygem != "" {
+	if slices.Contains(id.Language.GetTypes(), model.Rubygem) {
 		vm.Rubygem = &cobra.Command{
 			Use:   "Rubygem",
 			Short: "Select Rubygem manager package type",
@@ -110,7 +112,7 @@ func NewMenu(config model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Language.Go != "" {
+	if slices.Contains(id.Language.GetTypes(), model.Go) {
 		vm.Go = &cobra.Command{
 			Use:   "Go",
 			Short: "Select Go package type",
@@ -118,20 +120,12 @@ func NewMenu(config model.ConfigFile) *Menu {
 			Args:  cobra.NoArgs,
 		}
 	}
-	if config.Language.Python.Pip != "" {
+	if slices.Contains(id.Language.GetTypes(), model.Pip) {
 		vm.Pip = &cobra.Command{
 			Use:   "Pip",
 			Short: "Select Pip manager package type",
 			Long:  "Select Python pip package manager type and content to get list from",
 			Args:  cobra.NoArgs,
-		}
-	}
-	if config.Source != "" {
-		vm.Source = &cobra.Command{
-			Use:   "Source",
-			Short: "Select Source  package type",
-			Long:  "Select Source package manager type and content to get list from",
-			Args:  cobra.MinimumNArgs(0),
 		}
 	}
 	return vm
