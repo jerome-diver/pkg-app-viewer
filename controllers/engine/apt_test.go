@@ -44,11 +44,11 @@ func Test_Find_cleanBytes(t *testing.T) {
 
 func Test_Find_installOccurenceFound(t *testing.T) {
 	type TestContent struct {
-		title   string             // Test title
-		to_test string             // string to test
-		search  model.SystemOption // comparator algorythm model [All, Added,OfficialRepos, OtherRepos, FileSource]
-		want    []string           // expected to get back
-		clean   bool               // initialize Find.Packages ?
+		title   string              // Test title
+		to_test string              // string to test
+		search  model.ManagerOption // comparator algorythm model [All, Added,OfficialRepos, OtherRepos, FileSource]
+		want    []string            // expected to get back
+		clean   bool                // initialize Find.Packages ?
 	}
 	to_test := []TestContent{
 		{
@@ -119,7 +119,7 @@ func Test_Find_DebianPackagesToSearchFor(t *testing.T) {
 	}
 	type TestContent struct {
 		title    string
-		search   model.SystemOption
+		search   model.ManagerOption
 		fileName string
 		want     []string
 	}
