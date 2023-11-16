@@ -30,7 +30,6 @@ func (menu *Menu) InitView(version string, id *model.Identity) {
 	menu.View = view.NewMenu(id)
 	menu.View.SearchManager.Run = menu.execSearchPackageManager
 	menu.InitMenuCommand()
-	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.ShowMeta, "meta", "g", false, "show meta of gz files")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Debug, "debug", "d", "Error", "debug message printed mode [Error, Warn, Info, Debug]")
 	menu.View.Root.PersistentFlags().BoolVarP(&menu.Model.Interactive, "interactive", "i", false, "Interactive terminal mode")
 	menu.View.Root.PersistentFlags().StringVarP(&menu.Model.Output.File, "outFile", "o", "", "Output file name")
@@ -148,69 +147,69 @@ func (m *Menu) execSearchPackageManager(cmd *cobra.Command, arg []string) {
 
 func (m *Menu) execApt(cmd *cobra.Command, arg []string) {
 	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Dpkg
+	m.Model.ManagerName = model.Dpkg
 	switch arg[0] {
 	case "All":
-		m.Model.PackageOption = model.All
+		m.Model.ManagerOption = model.All
 	case "Added":
-		m.Model.PackageOption = model.User
+		m.Model.ManagerOption = model.User
 	case "OfficialAdded":
-		m.Model.PackageOption = model.System
+		m.Model.ManagerOption = model.System
 	case "OtherRepos":
-		m.Model.PackageOption = model.Foreign
+		m.Model.ManagerOption = model.Foreign
 	case "FileSource":
-		m.Model.PackageOption = model.FileSource
+		m.Model.ManagerOption = model.FileSource
 	default:
-		m.Model.PackageOption = model.All
+		m.Model.ManagerOption = model.All
 	}
 }
 
 func (m *Menu) execFlatpak(cmd *cobra.Command, arg []string) {
 	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Flatpak
+	m.Model.ManagerName = model.Flatpak
 }
 
 func (m *Menu) execRPM(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.RPM
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.RPM
 }
 
 func (m *Menu) execPacman(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Snap
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Snap
 }
 
 func (m *Menu) execZypper(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Snap
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Snap
 }
 
 func (m *Menu) execNix(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Snap
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Snap
 }
 
 func (m *Menu) execSnap(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Snap
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Snap
 }
 
 func (m *Menu) execRubygem(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Rubygem
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Rubygem
 }
 
 func (m *Menu) execPip(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Pip
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Pip
 }
 
 func (m *Menu) execRust(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Rustup
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Rustup
 }
 
 func (m *Menu) execGo(cmd *cobra.Command, arg []string) {
-	logging.Debug("Read dir argument from menu PackageType cmd", slog.String("arg[0]", arg[0]))
-	m.Model.PackageType = model.Go
+	logging.Debug("Read dir argument from menu ManagerName cmd", slog.String("arg[0]", arg[0]))
+	m.Model.ManagerName = model.Go
 }

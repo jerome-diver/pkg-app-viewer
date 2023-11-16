@@ -15,8 +15,8 @@ var logger report.Logging
 
 type Printer struct {
 	Output    model.Output
-	Packager  model.Manager
-	SearchFor model.SystemOption
+	Packager  model.ManagerName
+	SearchFor model.ManagerOption
 	Data      []string
 }
 
@@ -24,8 +24,8 @@ func NewPrinter(model *model.Menu) *Printer {
 	logger = report.GetLogger()
 	p := &Printer{
 		Output:    model.Output,
-		Packager:  model.PackageType,
-		SearchFor: model.PackageOption}
+		Packager:  model.ManagerName,
+		SearchFor: model.ManagerOption}
 	return p
 }
 

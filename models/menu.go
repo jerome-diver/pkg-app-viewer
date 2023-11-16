@@ -39,12 +39,11 @@ choices done to handle
 */
 type Menu struct {
 	Command       CommandRun
-	PackageType   Manager
-	PackageOption SystemOption
+	ManagerName   ManagerName
+	ManagerOption ManagerOption
 	FileName      string
 	DirName       string
 	Mode          string
-	ShowMeta      bool
 	Debug         string
 	Output        Output
 	Interactive   bool

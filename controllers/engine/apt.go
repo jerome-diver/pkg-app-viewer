@@ -108,7 +108,7 @@ func (f *AptHistory) removedOccurenceFound(ipl []byte) {
 *
 */
 
-func (f *AptHistory) AptPackagesToSearchFor(rawHistory []byte, mode model.SystemOption, args ...string) {
+func (f *AptHistory) AptPackagesToSearchFor(rawHistory []byte, mode model.ManagerOption, args ...string) {
 	// args could be a name of User
 	logging.Debug("Start (*AptHistory).AptInstalledFromHistory", slog.Int("raw", len(rawHistory)))
 	scanner := bufio.NewScanner(bytes.NewReader(rawHistory))

@@ -12,10 +12,10 @@ the list of const is the full
 list of manager that can be
 care about
 */
-type Manager int8
+type ManagerName int8
 
 const (
-	None Manager = iota
+	None ManagerName = iota
 	Dpkg
 	RPM
 	Pacman
@@ -31,7 +31,7 @@ const (
 	Pip
 )
 
-func (p Manager) String() string {
+func (p ManagerName) String() string {
 	switch p {
 	case Dpkg:
 		return "Debian like dpkg"
@@ -64,10 +64,10 @@ Identify packages mode request filter
 	- string
 	- specific algorithm
 */
-type SystemOption int8
+type ManagerOption int8
 
 const (
-	All SystemOption = iota
+	All ManagerOption = iota
 	User
 	System
 	Distribution
@@ -75,7 +75,7 @@ const (
 	FileSource
 )
 
-func (s SystemOption) String() string {
+func (s ManagerOption) String() string {
 	switch s {
 	case All:
 		return "All"
@@ -92,7 +92,7 @@ func (s SystemOption) String() string {
 	return "unknown"
 }
 
-func (s SystemOption) Algorythm() func(string) bool {
+func (s ManagerOption) Algorythm() func(string) bool {
 	switch s {
 	case FileSource:
 		return func(p string) bool {
@@ -124,9 +124,9 @@ type Repository struct { // Will contain the origin and packages list (uniq)
 		- Language is for specific language's package managers information
 */
 type Identity struct {
-	System   ManagersInfos[Manager]
-	Isolated ManagersInfos[[]Manager]
-	Language ManagersInfos[[]Manager]
+	System   ManagersInfos[ManagerName]
+	Isolated ManagersInfos[[]ManagerName]
+	Language ManagersInfos[[]ManagerName]
 }
 
 /*
@@ -136,12 +136,12 @@ generic interface to handle identity Manager
 */
 type ManagersInfos[T format] interface {
 	GetTypes() T
-	AsType(Manager) bool
+	AsType(ManagerName) bool
 	GetStruct() ManagersInfos[T]
 }
 
 type format interface {
-	Manager | []Manager
+	ManagerName | []ManagerName
 }
 
 /*
@@ -152,21 +152,21 @@ System Identity struct
 	And will have only one type of Manager
 */
 type SystemId struct {
-	Type Manager
+	Type ManagerName
 	Name string
 	Arch string
 }
 
 // Handle ManagersInfos[T] interface
-func (manager SystemId) AsType(t Manager) bool {
+func (manager SystemId) AsType(t ManagerName) bool {
 	return manager.Type == t
 }
 
-func (manager SystemId) GetTypes() Manager {
+func (manager SystemId) GetTypes() ManagerName {
 	return manager.Type
 }
 
-func (manager SystemId) GetStruct() ManagersInfos[Manager] {
+func (manager SystemId) GetStruct() ManagersInfos[ManagerName] {
 	return manager
 }
 
@@ -178,19 +178,19 @@ Other packages managers Identity struct
 	And will have many possible type of Manager
 */
 type NoSystemId struct {
-	Types []Manager
+	Types []ManagerName
 	User  string
 }
 
 // Handle ManagersInfos[T] interface
-func (manager NoSystemId) AsType(t Manager) bool {
+func (manager NoSystemId) AsType(t ManagerName) bool {
 	return slices.Contains(manager.Types, t)
 }
 
-func (manager NoSystemId) GetTypes() []Manager {
+func (manager NoSystemId) GetTypes() []ManagerName {
 	return manager.Types
 }
 
-func (manager NoSystemId) GetStruct() ManagersInfos[[]Manager] {
+func (manager NoSystemId) GetStruct() ManagersInfos[[]ManagerName] {
 	return manager
 }

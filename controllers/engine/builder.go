@@ -24,37 +24,80 @@ type ReposFinder interface { // Abstract Finder for repos
 	UserInstalled(userName string, packageName string) bool
 }
 
-type ReposHandler interface { // Abstract Handler for repos
+type ReposManager interface { // Abstract Handler for repos
 	//	GetRepos() map[string][]string
 	//	GetPackages() []string
 	GetInstalled() []model.Repository
-	SetReposHandler(ReposHandler)
+	SetReposHandler(ReposManager)
 	UpdateInstalled([]model.Repository)
-}
-
-type ManagerHandler interface { // Handle System Manager
-	ManagerModel() model.Manager
+	Model() model.ManagerName
 }
 
 type SystemReposAlgorithm interface { // algorithm to find System repos
 	OriginSelector(string) bool
 	Show()
-	Option() model.SystemOption
+	Option() model.ManagerOption
 }
 
 /*--------------------------------------------------------------------------------+
-|  Struct inherit interface SystemRepos                                          |
+|  InstalledSystemRepos is a component of SystemRepos                            |
 |	  and contains Arch and Name                                                    |
-|	  and is composed by Installed as PackagesOfRepo slice                          |
 |	  and methods to search by crawling files                                       |
 |	  and shared methods that will be used by specialized types through interface   |
 +--------------------------------------------------------------------------------*/
 
-type SystemRepos interface {
-	ManagerHandler
-	SystemReposAlgorithm
-	ReposFinder
-	ReposHandler
+type InstalledSystemRepos struct {
+	Installed      []model.Repository // ReposHandler must have it
+	Arch           string
+	Name           string
+	ModelManager   model.ManagerName
+	hasBeenChecked []string
+	userInstalled  map[string][]string // only for package managers that can check that
+}
+
+// Handle ReposHandler interface
+func (ir InstalledSystemRepos) GetInstalled() []model.Repository {
+	return ir.Installed
+}
+
+func (ir InstalledSystemRepos) SetReposHandler(installed ReposManager) {
+	ir = installed.(InstalledSystemRepos)
+}
+
+func (ir InstalledSystemRepos) UpdateInstalled(installed []model.Repository) {
+	ir.Installed = installed
+}
+
+func (ir InstalledSystemRepos) Model() model.ManagerName {
+	return ir.ModelManager
+}
+
+/*--------------------------------------------------------------------------------+
+|  InstalledLanguageRepos is a component of SystemRepos                            |
+|	  and contains User string                                                    |
+|	  and contains Language string                                                    |
+|	  and methods to search by crawling files                                       |
+|	  and shared methods that will be used by specialized types through interface   |
++--------------------------------------------------------------------------------*/
+
+type InstalledLanguageRepos struct {
+	Installed []model.Repository // ReposHandler must have it
+	User      string
+	Language  string
+}
+
+/*--------------------------------------------------------------------------------+
+|  InstalledIsolatedRepos is a component of SystemRepos                            |
+|	  and contains User string                                                    |
+|	  and contains Manager string                                                    |
+|	  and methods to search by crawling files                                       |
+|	  and shared methods that will be used by specialized types through interface   |
++--------------------------------------------------------------------------------*/
+
+type InstalledIsolatedRepos struct {
+	Installed []model.Repository // ReposHandler must have it
+	User      string
+	Manager   string
 }
 
 /*
@@ -67,41 +110,42 @@ this can be:
 	InstalledIsolatedRepos
 */
 
-type InstalledLanguageRepos struct {
-	Installed []model.Repository // ReposHandler must have it
+type SystemRepos interface {
+	SystemReposAlgorithm
+	ReposFinder
+	ReposManager
 }
 
-type InstalledIsolatedRepos struct {
-	Installed []model.Repository // ReposHandler must have it
+/*--------------------------------------------------------------------------------+
+|  Struct inherit interface LanguageRepos                                          |
+|	  and is composed by InstalledLanguageRepos                          |
+|	  and methods to search by crawling files                                       |
+|	  and shared methods that will be used by specialized types through interface   |
++--------------------------------------------------------------------------------*/
+
+type LanguageRepos interface {
+	ReposManager
+	ReposFinder
 }
 
-type InstalledSystemRepos struct {
-	Installed      []model.Repository // ReposHandler must have it
-	Arch           string
-	Name           string
-	hasBeenChecked []string
-	userInstalled  map[string][]string
+/*--------------------------------------------------------------------------------+
+|  Struct inherit interface IsolatedRepos                                          |
+|	  and is composed by InstalledIsolatedRepos                          |
+|	  and methods to search by crawling files                                       |
+|	  and shared methods that will be used by specialized types through interface   |
++--------------------------------------------------------------------------------*/
+
+type IsolatedRepos interface {
+	ReposManager
+	ReposFinder
 }
 
-// Handle ReposHandler interface
-func (ir InstalledSystemRepos) GetInstalled() []model.Repository {
-	return ir.Installed
-}
-
-func (ir InstalledSystemRepos) SetReposHandler(installed ReposHandler) {
-	ir = installed.(InstalledSystemRepos)
-}
-
-func (ir InstalledSystemRepos) UpdateInstalled(installed []model.Repository) {
-	ir.Installed = installed
-}
-
-//func (i *InstalledSystemRepos) Show() {
-//	for _, repo := range i.Installed {
-//		fmt.Printf("Origin: %s\n", repo.Origin)
-//		fmt.Printf("Packages: %s\n\n", repo.Packages)
-//	}
-//}
+/*func (i *InstalledSystemRepos) Show() {
+	for _, repo := range i.Installed {
+		fmt.Printf("Origin: %s\n", repo.Origin)
+		fmt.Printf("Packages: %s\n\n", repo.Packages)
+	}
+}*/
 
 /*
 	Methods to be used for all the namespace engine
@@ -122,7 +166,7 @@ func cleaningSystemRepos(repos []model.Repository) []model.Repository {
 	return repos
 }
 
-func GetRepos(repos_hanlder ReposHandler) map[string][]string {
+func GetRepos(repos_hanlder ReposManager) map[string][]string {
 	repos := map[string][]string{}
 	for _, repo := range repos_hanlder.GetInstalled() {
 		repos[repo.Origin] = repo.Packages
@@ -130,7 +174,7 @@ func GetRepos(repos_hanlder ReposHandler) map[string][]string {
 	return repos
 }
 
-func GetPackages(repos_handler ReposHandler) []string {
+func GetPackages(repos_handler ReposManager) []string {
 	packages := []string{}
 	for _, repo := range repos_handler.GetInstalled() {
 		packages = append(packages, repo.Packages...)
@@ -143,7 +187,7 @@ func GetPackages(repos_handler ReposHandler) []string {
    Construct the content of packages defined and implemented
 -----------------------------------------------------------------------------------------*/
 
-func NewSystemRepos(name, arch string, option model.SystemOption) SystemRepos {
+func NewSystemRepos(name, arch string, option model.ManagerOption) SystemRepos {
 	var ob SystemRepos
 	repos_handler := InstalledSystemRepos{
 		Installed:      []model.Repository{},
@@ -153,13 +197,28 @@ func NewSystemRepos(name, arch string, option model.SystemOption) SystemRepos {
 	}
 	switch name {
 	case "debian":
+		repos_handler.ModelManager = model.Dpkg
 		ob = NewDpkgRepos(option, repos_handler)
 	}
 	initSystemRepos(ob)
 	return ob
 }
 
-func NewDpkgRepos(system_option model.SystemOption, ir InstalledSystemRepos) SystemRepos {
+func NewLanguageRepos() LanguageRepos {
+	var ob LanguageRepos
+	return ob
+}
+
+func NewIsolatedRepos() IsolatedRepos {
+	var ob IsolatedRepos
+	return ob
+}
+
+/*
+	SystemRepos builders
+*/
+
+func NewDpkgRepos(system_option model.ManagerOption, ir InstalledSystemRepos) SystemRepos {
 	var inherit SystemRepos
 	switch system_option {
 	case model.Foreign:
@@ -181,6 +240,8 @@ func initSystemRepos(system_repos SystemRepos) {
 	system_repos.UpdateInstalled(clean_repositories)
 }
 
+// can not run with that... just an exemple how to use builder
+// it is just the time to build new Design Pattern oriented code
 func main() {
 	foreign_repos := NewSystemRepos("debian", "amd64", model.Foreign)
 	repos := GetPackages(foreign_repos)

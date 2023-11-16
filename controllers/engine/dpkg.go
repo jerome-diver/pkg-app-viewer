@@ -22,7 +22,7 @@ type DpkgRepos struct {
 }
 
 // Handle ManagerHandler interface
-func (d DpkgRepos) ManagerModel() model.Manager {
+func (d DpkgRepos) Model() model.ManagerName {
 	return model.Dpkg
 }
 
@@ -163,13 +163,13 @@ func (ir DpkgRepos) IsInstalled(packageName string) bool {
 func (ir DpkgRepos) UserInstalled(userName string, packageName string) bool {
 	// check if packageName has been installed by userName
 	if ir.userInstalled[userName] == nil {
-		ir.populateUserInstalledFor(userName)
+		ir.populateUserInstalled(userName)
 	}
 	pkg_list := ir.userInstalled[userName]
 	return slices.Contains(pkg_list, packageName)
 }
 
-func (ir DpkgRepos) populateUserInstalledFor(userName string) {
+func (ir DpkgRepos) populateUserInstalled(userName string) {
 	// Have to use Apt search for user mode
 	logging.Debug("RUN Dpkg.UserInstalled from engine",
 		slog.String("userName", userName))
@@ -204,7 +204,7 @@ func (repos PopOSRepos) Show() {
 	fmt.Println("+------------------------------+")
 }
 
-func (repos PopOSRepos) Option() model.SystemOption {
+func (repos PopOSRepos) Option() model.ManagerOption {
 	return model.Distribution
 }
 
@@ -228,7 +228,7 @@ func (repos DebianRepos) Show() {
 	fmt.Println("+------------------------------+")
 }
 
-func (repos DebianRepos) Option() model.SystemOption {
+func (repos DebianRepos) Option() model.ManagerOption {
 	return model.System
 }
 
@@ -252,7 +252,7 @@ func (repos UbuntuRepos) Show() {
 	fmt.Println("+------------------------------+")
 }
 
-func (repos UbuntuRepos) Option() model.SystemOption {
+func (repos UbuntuRepos) Option() model.ManagerOption {
 	return model.System
 }
 
@@ -278,6 +278,6 @@ func (repos ForeignDebRepos) Show() {
 	fmt.Println("+---------------------------------+")
 }
 
-func (repos ForeignDebRepos) Option() model.SystemOption {
+func (repos ForeignDebRepos) Option() model.ManagerOption {
 	return model.Foreign
 }

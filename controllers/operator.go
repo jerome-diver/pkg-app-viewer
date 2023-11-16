@@ -1,6 +1,7 @@
 package controller
 
 import (
+	engine "github.com/pkg-app-viewer/controllers/engine"
 	identifier "github.com/pkg-app-viewer/controllers/manager"
 	tool "github.com/pkg-app-viewer/controllers/tools"
 	model "github.com/pkg-app-viewer/models"
@@ -13,7 +14,7 @@ type Operator struct {
 	Printer    *view.Printer
 	Tool       *tool.Box
 	PackagesId *model.Identity
-	Installed  []*identifier.Manager
+	Installed  []engine.ReposManager
 }
 
 var config model.Config
@@ -25,7 +26,6 @@ func NewOperator(menu_model *model.Menu) *Operator {
 	o.MenuModel = menu_model
 	o.Tool = tool.New()
 	o.PackagesId = identifier.New()
-	o.Installed = []*identifier.Manager{}
 	o.Printer = view.NewPrinter(menu_model)
 	return o
 }
@@ -75,10 +75,10 @@ func (o *Operator) BuildContent() {
 }
 
 func (p *Operator) Show() {
-	switch p.MenuModel.PackageType {
+	switch p.MenuModel.ManagerName {
 	case model.Dpkg:
 		{
-			found := p.Apt(p.MenuModel.PackageOption)
+			found := p.Apt(p.MenuModel.ManagerOption)
 			p.Printer.Write(found)
 		}
 	}

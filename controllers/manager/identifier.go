@@ -44,7 +44,7 @@ func file_system_possible() []string {
 		from data bytes found
 		to model.Manager
 */
-func getSystemManagerType(data []byte) model.Manager {
+func getSystemManagerType(data []byte) model.ManagerName {
 	data = bytes.Trim(data, "\"")
 	if bytes.Contains(data, []byte("debian")) {
 		return model.Dpkg
